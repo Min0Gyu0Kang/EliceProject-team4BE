@@ -8,6 +8,7 @@ Date        Author   Status    Description
 2024.06.08  이유민   Created
 2024.06.08  이유민   Modified  노후화 비율 API 추가
 2024.06.08  이유민   Modified  1인당 공원 면적 API 추가
+2024.06.09  이유민   Modified  노후화 비율 API 수정
 */
 
 const { Router } = require("express");
@@ -129,29 +130,33 @@ router.get("/chart-tinybar", (req, res) => {
       console.error("쿼리 실행 에러:", err);
       res.status(500).json({ message: "서버 내부 오류" });
     } else {
-      noneData = 0;
-      noOldness = 0;
-      yesOldness = 0;
-      yesOldnessLater = 0;
+      resData = [
+        { name: "데이터없음", count: 0, percentage: 0.0 },
+        { name: "30년 이하\n2024.06.08 기준", count: 0, percentage: 0.0 },
+        { name: "31년 이상", count: 0, percentage: 0.0 },
+        { name: "", count: 0, percentage: 0.0 },
+        { name: "31년이상\n2034.06.08 기준", count: 0, percentage: 0.0 },
+      ];
+      total = 0;
 
       for (const data of result.rows) {
+        total++;
         if (data.is_old == false) {
-          noOldness++;
+          resData[1].count++;
+        } else if (data.is_old == true) {
+          resData[2].count++;
         } else {
-          yesOldness++;
+          resData[0].count++;
         }
-        if (data.will_be_old_in_10_years == true) yesOldnessLater++;
+        if (data.will_be_old_in_10_years == true) resData[4].count++;
       }
-      total = noOldness + yesOldness + yesOldnessLater;
 
-      res.json({
-        none: noneData,
-        noOldness: parseFloat(((noOldness / total) * 100).toFixed(2)),
-        yesOldness: parseFloat(((yesOldness / total) * 100).toFixed(2)),
-        yesOldnessLater: parseFloat(
-          ((yesOldnessLater / total) * 100).toFixed(2)
-        ),
-      });
+      for (const dt of resData) {
+        dt.percentage = parseFloat(((dt.count / total) * 100).toFixed(2));
+        delete dt.count;
+      }
+
+      res.json(resData);
     }
   });
 });
