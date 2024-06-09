@@ -1,3 +1,13 @@
+/**
+File Name : swagger
+Description : swagger 기본 코드
+Author : 이유민
+
+History
+Date        Author   Status    Description
+2024.06.08  이유민   Created
+2024.06.08  이유민   Done      swagger 기본 코드 작성 완료
+*/
 const swaggerUi = require("swagger-ui-express");
 const swaggereJsdoc = require("swagger-jsdoc");
 

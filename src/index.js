@@ -1,7 +1,9 @@
 const express = require("express");
-const { swaggerUi, specs } = require("./swagger/swagger");
+const { swaggerUi, specs } = require("./utils/swagger");
 require("dotenv").config();
-const user = require("./routes/user.js"); // swagger 예제 코드 추후 삭제 예정
+const bodyParser = require("body-parser");
+
+const dashboard = require("./routes/dashboard");
 
 const app = express();
 
@@ -10,7 +12,7 @@ app.get("/", (req, res, next) => {
 });
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
-app.use("/user", user);
+app.use("/api/dashboard", dashboard);
 
 app.listen(process.env.PORT, () => {
   console.log(`server listening on port ${process.env.PORT}`);
