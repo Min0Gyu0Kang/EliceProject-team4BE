@@ -9,8 +9,8 @@ Date        Author   Status    Description
 2024.06.11  이유민   Modified  ssl 추가
 2024.06.11  이유민   Done      DB 연동 완료
 */
-const { Client } = require("pg");
-require("dotenv").config();
+const {Client} = require('pg');
+require('dotenv').config();
 
 const client = new Client({
   user: process.env.DB_USER,
@@ -24,16 +24,16 @@ const client = new Client({
   },
 });
 
-client.connect((err) => {
-  if (err) {
-    console.error("PostgreSQL 연결 에러:", err);
-  } else {
-    console.log("PostgreSQL 연결 성공");
-  }
+client.connect(err => {
+    if (err) {
+        console.error('PostgreSQL 연결 에러:', err);
+    } else {
+        console.log('PostgreSQL 연결 성공');
+    }
 });
 
-client.on("end", () => {
-  console.log("PostgreSQL와의 연결이 끊겼습니다.");
+client.on('end', () => {
+    console.log('PostgreSQL와의 연결이 끊겼습니다.');
 });
 
 module.exports = client;
