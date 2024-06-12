@@ -9,7 +9,7 @@ Date        Author   Status    Description
 2024.06.08  이유민   Modified  Tinybar API 추가
 2024.06.08  이유민   Modified  Linebar API 추가
 2024.06.09  이유민   Modified  Tinybar API 수정
-2024.06.10  이유민   Modified  Tinybar, Linebar API 수정
+2024.06.12  이유민   Modified  Tinybar, Linebar API 수정
 */
 
 const { Router } = require("express");
@@ -66,28 +66,24 @@ router.get("/chart-linebar", async (req, res, next) => {
     ORDER BY a.year;'
     );
 
-    resData = [];
-    for (const data of result.rows) {
-      resData.push({
+    const resData = result.rows.map((data) => {
+      const item = {
         year: data.year,
         capita: Math.round(data.capita * 10) / 10,
-        satisfaction:
-          Math.round(data.satisfaction * 100) / 100 == 0
-            ? null
-            : Math.round(data.satisfaction * 100) / 100,
-        line:
-          data.year == 2013
-            ? Math.round(data.capita * 10) / 10
-            : data.year == 2022
-            ? Math.round(data.capita * 10) / 10
-            : null,
-      });
-    }
+      };
 
-    for (const data of resData) {
-      if (data.satisfaction == null) delete data.satisfaction;
-      if (data.line == null) delete data.line;
-    }
+      // 녹지환경 만족도 있는 연도에만 만족도 추가
+      if (data.year % 2 == 0) {
+        item.satisfaction = Math.round(data.satisfaction * 100) / 100;
+      }
+
+      // 첫 연도와 마지막 연도에만 line 추가
+      if (data.year === 2010 || data.year === 2022) {
+        item.line = Math.round(data.capita * 10) / 10;
+      }
+
+      return item;
+    });
 
     res.json(resData);
   } catch (e) {
@@ -125,34 +121,32 @@ router.get("/chart-linebar", async (req, res, next) => {
  *          type: string
  */
 router.get("/chart-tinybar", async (req, res, next) => {
+  function percentageCalc(data, filterValue, standard) {
+    let res =
+      data.filter((dt) =>
+        standard == 2034
+          ? dt.will_be_old_in_10_years == filterValue
+          : dt.is_old == filterValue
+      ).length / data.length;
+    return parseFloat((res * 100).toFixed(2));
+  }
+
   try {
     const result = await db.query('SELECT * FROM public."park_oldness_rate";');
 
     resData = [
-      { name: "데이터 없음", count: 0, percentage: 0.0 },
-      { name: "30년 이하\n2024.06.08 기준", count: 0, percentage: 0.0 },
-      { name: "31년 이상", count: 0, percentage: 0.0 },
-      { name: "", count: 0, percentage: 0.0 },
-      { name: "31년이상\n2034.06.08 기준", count: 0, percentage: 0.0 },
+      { name: "데이터 없음", percentage: percentageCalc(result.rows, "N") },
+      {
+        name: "30년 이하\n2024.06.08 기준",
+        percentage: percentageCalc(result.rows, "F"),
+      },
+      { name: "31년 이상", percentage: percentageCalc(result.rows, "T") },
+      { name: "", percentage: 0.0 },
+      {
+        name: "31년 이상\n2034.06.08 기준",
+        percentage: percentageCalc(result.rows, "T", 2034),
+      },
     ];
-    total = 0;
-
-    for (const data of result.rows) {
-      total++;
-      if (data.is_old == "F") {
-        resData[1].count++;
-      } else if (data.is_old == "T") {
-        resData[2].count++;
-      } else {
-        resData[0].count++;
-      }
-      if (data.will_be_old_in_10_years == "T") resData[4].count++;
-    }
-
-    for (const dt of resData) {
-      dt.percentage = parseFloat(((dt.count / total) * 100).toFixed(2));
-      delete dt.count;
-    }
 
     res.json(resData);
   } catch (e) {
