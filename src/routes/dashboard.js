@@ -10,6 +10,7 @@ Date        Author   Status    Description
 2024.06.08  이유민   Modified  Linebar API 추가
 2024.06.09  이유민   Modified  Tinybar API 수정
 2024.06.12  이유민   Modified  Tinybar, Linebar API 수정
+2024.06.13  이유민   Modified  Tinybar API 수정
 */
 
 const { Router } = require("express");
@@ -137,14 +138,19 @@ router.get("/chart-tinybar", async (req, res, next) => {
     resData = [
       { name: "데이터 없음", percentage: percentageCalc(result.rows, "N") },
       {
-        name: "30년 이하\n2024.06.08 기준",
+        name: "30년 이하",
         percentage: percentageCalc(result.rows, "F"),
       },
-      { name: "31년 이상", percentage: percentageCalc(result.rows, "T") },
+      {
+        name: "31년 이상",
+        percentage: percentageCalc(result.rows, "T"),
+        date: "2024-06-08",
+      },
       { name: "", percentage: 0.0 },
       {
-        name: "31년 이상\n2034.06.08 기준",
+        name: "31년 이상",
         percentage: percentageCalc(result.rows, "T", 2034),
+        date: "2034-06-08",
       },
     ];
 
