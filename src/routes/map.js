@@ -1,12 +1,11 @@
-/**File Name : dashboardScatter
-Description : 대시보드 산점도 차트 API
+/**File Name : map
+Description : 지도 API
 Author : 박수정
 
 History
 Date        Author   Status     Description
-2024.06.10  박수정   Created
-2024.06.11  박수정   Modified   대시보드 Scatter 차트 API 추가
-2024.06.12  박수정   Modified   대시보드 Scatter 차트 API 수정
+2024.06.13  박수정   Created
+2024.06.13  박수정   Modified   지도 API 추가
 2024.06.13  박수정   Modified   API 문서 자동화 기능 추가
 */
 
@@ -16,33 +15,35 @@ const { BadRequest, NotFound } = require('../utils/errors');
 
 const router = Router();
 
-// 대시보드 산점도(Scatter) 차트 API
-// 천 명당 공원 면적 대비 지역 별 녹지환경 만족도
+// 지도 API
 /**
  * @swagger
  * paths:
- *  /dashboard/scatter:
+ *  /map:
  *   get:
- *    summary: 'Scatter 차트 API'
+ *    summary: '지도 API'
  *    tags:
  *    - dashboard
- *    description: '천 명당 공원 면적 대비 지역 별 녹지환경 만족도 API 정보 GET'
+ *    description: '지도 API 정보 GET'
  *    responses:
  *     200:
  *      description: 정보 조회 성공
  *      schema:
  *       properties:
- *        city:
+ *        name:
  *         type: string
- *         description: 시도
- *        park_area_per_thousand:
+ *         description: 공원명
+ *        address:
+ *         type: string
+ *         description: 소재지 지번주소
+ *        latitude:
  *         type: number
- *         format: float
- *         description: 2022년 천 명당 공원 면적
- *        satisfaction:
+ *         format: double
+ *         description: 위도
+ *        longitude:
  *         type: number
- *         format: float
- *         description: 2022년 지역 별 녹지환경 만족도
+ *         format: double
+ *         description: 경도
  *     400:
  *      description: 잘못된 요청
  *      schema:
@@ -68,17 +69,16 @@ const router = Router();
  *          type: string
  *          example: "서버 내부 에러가 발생했습니다."
  */
-router.get('/scatter', async (req, res, next) => {
+router.get('/', async (req, res, next) => {
     try {
         const { rows } = await db.query(`
-            SELECT pr.city, pt.park_area_per_thousand, g.satisfaction
-            FROM park_area_per_thousand pt
-            JOIN green_space_satisfaction g
-                ON g.year = 2022
-                AND pt.park_legal_region_id = g.park_legal_region_id
-            JOIN park_legal_region pr
-                ON pt.park_legal_region_id = pr.id;
+            SELECT p.name, pr.address, pr.latitude, pr.longitude
+            FROM park p
+            JOIN park_region pr
+                ON p.park_region_id = pr.id
         `);
+
+        console.log(rows);
 
         // 쿼리에 대한 유효성 검사
         if (!rows || rows.length === 0) {
@@ -87,14 +87,15 @@ router.get('/scatter', async (req, res, next) => {
 
         const data = rows.map(row => {
             // 각 데이터에 대한 유효성 검사
-            if (!row.city || !row.park_area_per_thousand || !row.satisfaction) {
+            if (!row.name || !row.address || !row.latitude || !row.longitude) {
                 return next(new BadRequest('데이터가 존재하지 않습니다.'));
             }
 
             return {
-                city: row.city,
-                park_area_per_thousand: row.park_area_per_thousand,
-                satisfaction: row.satisfaction,
+                name: row.name,
+                address: row.address,
+                latitude: row.latitude,
+                longitude: row.longitude,
             };
         });
 
