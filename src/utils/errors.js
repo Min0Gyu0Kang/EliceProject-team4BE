@@ -5,6 +5,8 @@ Author : 박수정
 History
 Date        Author   Status     Description
 2024.06.13  박수정   Created
+2024.06.13  박수정   Modified   에러 처리 미들웨어 추가
+2024.06.13  박수정   Done       에러 처리 미들웨어 완료
 */
 
 class BadRequest extends Error {

@@ -19,6 +19,8 @@ app.use('/dashboard-scatter', dashboardScatter);
 // 에러 처리
 app.use((error, req, res, next) => {
     const { name, message, status, data } = error;
+    console.error(error.stack);
+
     if (status >= 500) {
         console.error(name, message);
         res.status(status).json({
@@ -27,6 +29,7 @@ app.use((error, req, res, next) => {
         });
         return;
     }
+
     res.status(status).json({
         error: message,
         data,
