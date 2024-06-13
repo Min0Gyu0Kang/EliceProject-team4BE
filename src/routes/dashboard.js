@@ -114,6 +114,9 @@ router.get("/chart-linebar", async (req, res, next) => {
  *         type: number
  *         format: float
  *         description: 해당 데이터의 비율
+ *        date:
+ *         type: string
+ *         description: 기준 날짜
  *     500:
  *      description: 서버 오류
  *      schema:
