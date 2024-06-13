@@ -10,7 +10,7 @@ Date        Author   Status    Description
 2024.06.08  이유민   Modified  Linebar API 추가
 2024.06.09  이유민   Modified  Tinybar API 수정
 2024.06.12  이유민   Modified  Tinybar, Linebar API 수정
-2024.06.13  이유민   Modified  Tinybar API 수정
+2024.06.13  이유민   Done      Tinybar API 수정
 */
 
 const { Router } = require("express");
