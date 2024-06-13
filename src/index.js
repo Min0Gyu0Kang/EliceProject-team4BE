@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 
 const dashboard = require('./routes/dashboard');
 const dashboardScatter = require('./routes/dashboardScatter');
+const map = require('./routes/map');
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.get('/', (req, res, next) => {
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/api/dashboard', dashboard);
 app.use('/dashboard-scatter', dashboardScatter);
+app.use('/map', map);
 
 // 에러 처리
 app.use((error, req, res, next) => {
