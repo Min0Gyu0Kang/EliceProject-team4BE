@@ -46,7 +46,17 @@ class DashboardService {
     async getLinebar() {
         const { rows } = await DashboardModel.getLinebar();
 
+        // 쿼리에 대한 유효성 검사
+        if (!rows || rows.length === 0) {
+            return new NotFound();
+        }
+
         const resData = rows.map(data => {
+            // 각 데이터에 대한 유효성 검사
+            if (!data.city || !data.year || !data.capita) {
+                return new BadRequest('데이터가 존재하지 않습니다.');
+            }
+
             const item = {
                 year: data.year,
                 capita: Math.round(data.capita * 10) / 10,
@@ -78,6 +88,11 @@ class DashboardService {
         }
 
         const { rows } = await DashboardModel.getTinybar();
+
+        // 쿼리에 대한 유효성 검사
+        if (!rows || rows.length === 0) {
+            return new NotFound();
+        }
 
         const resData = [
             { name: '데이터 없음', percentage: percentageCalc(rows, 'N') },
