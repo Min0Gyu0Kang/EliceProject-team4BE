@@ -19,5 +19,6 @@
     "prettier": "3.3.2",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
-  }
+  },
+  "type": "module"
 }
