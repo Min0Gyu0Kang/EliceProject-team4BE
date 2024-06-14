@@ -116,12 +116,16 @@ const router = Router();
  */
 router.get('/', async (req, res, next) => {
     try {
-        const data = await serviceInstance.getScatter();
+        const scatter = await serviceInstance.getScatter();
 
         // Service로부터 넘어온 데이터에 대한 유효성 검사
-        if (!data || data.length === 0) {
+        if (!scatter || scatter.length === 0) {
             return next(new NotFound());
         }
+
+        const data = {
+            scatter,
+        };
 
         res.json(data);
     } catch (e) {
