@@ -4,7 +4,6 @@ require('dotenv').config();
 const bodyParser = require('body-parser');
 
 const dashboard = require('./routes/dashboard');
-const dashboardScatter = require('./routes/dashboardScatter');
 const map = require('./routes/map');
 
 const app = express();
@@ -13,9 +12,11 @@ app.get('/', (req, res, next) => {
     res.send('Hello World');
 });
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
-app.use('/api/dashboard', dashboard);
-app.use('/dashboard-scatter', dashboardScatter);
+app.use('/dashboard', dashboard);
 app.use('/map', map);
 
 // 에러 처리
@@ -26,7 +27,7 @@ app.use((error, req, res, next) => {
     if (status >= 500) {
         console.error(name, message);
         res.status(status).json({
-            error: '서버 내부에서 에러가 발생하였습니다.',
+            error: '서버 내부에서 에러가 발생했습니다.',
             data,
         });
         return;
