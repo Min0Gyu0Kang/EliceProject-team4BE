@@ -19,6 +19,7 @@ Date        Author   Status    Description
 const { Router } = require('express');
 const db = require('../models/psql');
 const { BadRequest, NotFound } = require('../utils/errors');
+const { dashboardService } = require('../services/dashboard');
 
 const router = Router();
 
@@ -62,35 +63,8 @@ const router = Router();
  */
 router.get('/linebar', async (req, res, next) => {
     try {
-        const result = await db.query(`
-          SELECT a.year, AVG(a.park_area_per_capita) as capita, AVG(b.satisfaction) as satisfaction 
-          FROM public."park_area_per_capita" AS a 
-          LEFT JOIN public."green_space_satisfaction" AS b 
-          ON a.year = b.year 
-          GROUP BY a.year 
-          ORDER BY a.year;
-          `);
-
-        const resData = result.rows.map(data => {
-            const item = {
-                year: data.year,
-                capita: Math.round(data.capita * 10) / 10,
-            };
-
-            // 녹지환경 만족도 있는 연도에만 만족도 추가
-            if (data.year % 2 == 0) {
-                item.satisfaction = Math.round(data.satisfaction * 100) / 100;
-            }
-
-            // 첫 연도와 마지막 연도에만 line 추가
-            if (data.year === 2010 || data.year === 2022) {
-                item.line = Math.round(data.capita * 10) / 10;
-            }
-
-            return item;
-        });
-
-        res.json(resData);
+        const result = await dashboardService.getLinebar();
+        res.json(result);
     } catch (e) {
         next(e);
     }
@@ -129,36 +103,10 @@ router.get('/linebar', async (req, res, next) => {
  *          type: string
  */
 router.get('/tinybar', async (req, res, next) => {
-    function percentageCalc(data, filterValue, standard) {
-        let res =
-            data.filter(dt => (standard == 2034 ? dt.will_be_old_in_10_years == filterValue : dt.is_old == filterValue))
-                .length / data.length;
-        return parseFloat((res * 100).toFixed(2));
-    }
-
     try {
-        const result = await db.query(`SELECT is_old, will_be_old_in_10_years FROM public."park_oldness_rate";`);
+        const result = await dashboardService.getTinybar();
 
-        resData = [
-            { name: '데이터 없음', percentage: percentageCalc(result.rows, 'N') },
-            {
-                name: '30년 이하',
-                percentage: percentageCalc(result.rows, 'F'),
-            },
-            {
-                name: '31년 이상',
-                percentage: percentageCalc(result.rows, 'T'),
-                date: '2024-06-08',
-            },
-            { name: '', percentage: 0.0 },
-            {
-                name: '31년 이상',
-                percentage: percentageCalc(result.rows, 'T', 2034),
-                date: '2034-06-08',
-            },
-        ];
-
-        res.json(resData);
+        res.json(result);
     } catch (e) {
         next(e);
     }
