@@ -10,43 +10,22 @@ Date        Author   Status    Description
 2024.06.14  박수정   Modified  Scatter API 분리 - routes, service, model
 2024.06.14  이유민   Modified  Linebar, Tinybar 추가
 2024.06.14  이유민   Modified  ES6 모듈로 변경
+2024.06.15  박수정   Modified  전체적인 코드 통일 및 유효성 검사 코드 분리
 */
 
-import { DashboardModel } from '../models/dashboard.js';
-import { BadRequest, NotFound } from '../utils/errors.js';
+import DashboardModel from '../models/dashboard.js';
+import { validateQueryAndField } from '../utils/validations.js';
 
-// Scatter 차트 데이터
-
-// 클래스 기반 코드
 class DashboardService {
-    async getScatter() {
-        const rows = await DashboardModel.getScatter();
-
-        // 쿼리에 대한 유효성 검사
-        if (!rows || rows.length === 0) {
-            return new NotFound();
-        }
-
-        const data = rows.map(row => {
-            // 각 데이터에 대한 유효성 검사
-            if (!row.city || !row.park_area_per_thousand || !row.satisfaction) {
-                return new BadRequest('데이터가 존재하지 않습니다.');
-            }
-
-            return {
-                city: row.city,
-                park_area_per_thousand: row.park_area_per_thousand,
-                satisfaction: row.satisfaction,
-            };
-        });
-
-        return data;
-    }
-
-    async getLinebar() {
+    // Linebar
+    static async getLinebar() {
         const { rows } = await DashboardModel.getLinebar();
 
-        const resData = rows.map(data => {
+        // 쿼리 및 각 데이터 (항목의) 필드에 대한 유효성 검사
+        const requiredFields = ['year', 'capita'];
+        const validatedRows = validateQueryAndField(rows, requiredFields);
+
+        const resData = validatedRows.map(data => {
             const item = {
                 year: data.year,
                 capita: Math.round(data.capita * 10) / 10,
@@ -68,7 +47,14 @@ class DashboardService {
         return resData;
     }
 
-    async getTinybar() {
+    // Tinybar
+    static async getTinybar() {
+        const { rows } = await DashboardModel.getTinybar();
+
+        // 쿼리 및 각 데이터 (항목의) 필드에 대한 유효성 검사
+        const requiredFields = ['will_be_old_in_10_years', 'is_old'];
+        const validatedRows = validateQueryAndField(rows, requiredFields);
+
         function percentageCalc(data, filterValue, standard) {
             let res =
                 data.filter(dt =>
@@ -77,30 +63,52 @@ class DashboardService {
             return parseFloat((res * 100).toFixed(2));
         }
 
-        const { rows } = await DashboardModel.getTinybar();
-
         const resData = [
-            { name: '데이터 없음', percentage: percentageCalc(rows, 'N') },
+            {
+                name: '데이터 없음',
+                percentage: percentageCalc(validatedRows, 'N'),
+            },
             {
                 name: '30년 이하',
-                percentage: percentageCalc(rows, 'F'),
+                percentage: percentageCalc(validatedRows, 'F'),
             },
             {
                 name: '31년 이상',
-                percentage: percentageCalc(rows, 'T'),
+                percentage: percentageCalc(validatedRows, 'T'),
                 date: '2024-06-08',
             },
-            { name: '', percentage: 0.0 },
+            {
+                name: '',
+                percentage: 0.0,
+            },
             {
                 name: '31년 이상',
-                percentage: percentageCalc(rows, 'T', 2034),
+                percentage: percentageCalc(validatedRows, 'T', 2034),
                 date: '2034-06-08',
             },
         ];
 
         return resData;
     }
+
+    // Scatter
+    static async getScatter() {
+        const { rows } = await DashboardModel.getScatter();
+
+        // 쿼리 및 각 데이터 (항목의) 필드에 대한 유효성 검사
+        const requiredFields = ['city', 'park_area_per_thousand', 'satisfaction'];
+        const validatedRows = validateQueryAndField(rows, requiredFields);
+
+        const resData = validatedRows.map(data => {
+            return {
+                city: data.city,
+                park_area_per_thousand: data.park_area_per_thousand,
+                satisfaction: data.satisfaction,
+            };
+        });
+
+        return resData;
+    }
 }
 
-const serviceInstance = new DashboardService(); // 싱글톤 인스턴스 생성
-export default serviceInstance;
+export default DashboardService;
