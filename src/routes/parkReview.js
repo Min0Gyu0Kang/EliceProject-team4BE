@@ -49,13 +49,30 @@ const router = Router();
  *        message:
  *         type: string
  *         example: 리뷰가 성공적으로 작성되었습니다.
+ *     400:
+ *       description: 잘못된 요청
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '잘못된 요청입니다.'
+ *     404:
+ *       description: 요청한 리소스를 찾을 수 없음
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '요청한 리소스를 찾을 수 없습니다.'
  *     500:
- *      description: 서버 오류
- *      schema:
- *       properties:
- *         message:
- *          type: string
- *          example: 서버 내부에서 에러가 발생했습니다.
+ *       description: 서버 내부 오류
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '서버 내부 에러가 발생했습니다.'
  */
 router.post('/:park_id', async (req, res, next) => {
     const { park_id } = req.params;
@@ -96,13 +113,30 @@ router.post('/:park_id', async (req, res, next) => {
  *        message:
  *         type: string
  *         example: 리뷰가 성공적으로 수정되었습니다.
+ *     400:
+ *       description: 잘못된 요청
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: 잘못된 요청입니다.
+ *     404:
+ *       description: 요청한 리소스를 찾을 수 없음
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '요청한 리소스를 찾을 수 없습니다.'
  *     500:
- *      description: 서버 오류
- *      schema:
- *       properties:
- *         message:
- *          type: string
- *          example: 서버 내부에서 에러가 발생했습니다.
+ *       description: 서버 내부 오류
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '서버 내부 에러가 발생했습니다.'
  */
 router.put('/:id', async (req, res, next) => {
     const { id } = req.params;
@@ -141,13 +175,22 @@ router.put('/:id', async (req, res, next) => {
  *        message:
  *         type: string
  *         example: 리뷰가 성공적으로 삭제되었습니다.
+ *     404:
+ *       description: 요청한 리소스를 찾을 수 없음
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '요청한 리소스를 찾을 수 없습니다.'
  *     500:
- *      description: 서버 오류
- *      schema:
- *       properties:
- *         message:
- *          type: string
- *          example: 서버 내부에서 에러가 발생했습니다.
+ *       description: 서버 내부 오류
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '서버 내부 에러가 발생했습니다.'
  */
 router.delete('/:id', async (req, res, next) => {
     const { id } = req.params;
@@ -160,38 +203,67 @@ router.delete('/:id', async (req, res, next) => {
     }
 });
 
-// 해당 공원의 리뷰 상세보기 - 공원 이름, 평균 리뷰 점수
+// 해당 공원의 리뷰 상세보기
 /**
  * @swagger
  * paths:
- *  /park-review/details/{id}:
+ *  /park-review/details/{park_id}:
  *   get:
- *    summary: "공원의 이름, 평균 점수 조회 API"
+ *    summary: "공원 리뷰 상세보기 API"
  *    tags:
  *    - park-review
- *    description: "공원의 이름, 평균 점수 정보 GET"
+ *    description: "공원 리뷰 상세 정보 GET"
  *    responses:
  *     200:
  *      description: 정보 조회 성공
  *      schema:
  *       properties:
- *        id:
- *         type: string
- *         description: 공원 ID
- *        name:
- *         type: string
- *         description: 공원명
- *        average_review:
- *         type: number
- *         format: float
- *         description: 해당 공원의 평균 별점
+ *        park:
+ *         type: array
+ *         items:
+ *          type: object
+ *          properties:
+ *           id:
+ *            type: integer
+ *            format: int32
+ *            description: 공원 ID
+ *           name:
+ *            type: string
+ *            description: 공원명
+ *           average_review:
+ *            type: string
+ *            description: 평균 별점
+ *        review:
+ *         type: array
+ *         items:
+ *          type: object
+ *          properties:
+ *           nickname:
+ *            type: string
+ *            description: 리뷰 작성자 닉네임
+ *           grade:
+ *            type: integer
+ *            format: int32
+ *            description: 별점
+ *           content:
+ *            type: string
+ *            description: 공원 후기 내용
+ *     404:
+ *       description: 요청한 리소스를 찾을 수 없음
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '요청한 리소스를 찾을 수 없습니다.'
  *     500:
- *      description: 서버 오류
- *      schema:
- *       properties:
- *         message:
- *          type: string
- *          example: 서버 내부에서 에러가 발생했습니다.
+ *       description: 서버 내부 오류
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '서버 내부 에러가 발생했습니다.'
  */
 router.get('/details/:park_id', async (req, res, next) => {
     const { park_id } = req.params;
