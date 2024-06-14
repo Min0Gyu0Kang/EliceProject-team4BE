@@ -14,19 +14,17 @@ import db from '../models/psql.js';
 class ParkReviewModel {
     // 리뷰 생성
     static async createReview(id, park_id, user_id, content, grade) {
-        const query = `
+        return await db.query(`
             INSERT INTO public."park_review" (id, park_id, user_id, content, grade)  
             VALUES (${id}, ${park_id}, ${user_id}, '${content}', ${grade});
-            `;
-        return await db.query(query);
+            `);
     }
 
     // id 이용해서 리뷰 조회
     static async readReviewById(id) {
-        const query = `
+        return await db.query(`
             SELECT id, deleted_at FROM public."park_review" WHERE id = ${id}
-            `;
-        return await db.query(query);
+            `);
     }
 
     // id 이용해서 리뷰 수정
@@ -52,6 +50,8 @@ class ParkReviewModel {
                 GROUP BY park.id;
                 `);
     }
+
+    // park id 이용해서 리뷰 상세 조회
     static async readReviewDetailByParkId(park_id) {
         return await db.query(`
                 SELECT users.nickname, review.grade, review.content

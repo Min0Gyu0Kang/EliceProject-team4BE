@@ -145,12 +145,11 @@ router.get('/recommend/city/:city', async (req, res, next) => {
  */
 router.get('/recommend', async (req, res, next) => {
     const { city, district } = req.query;
-    const page = Number(req.query.page || 1); // 현재 페이지
+    const page = Number(req.query.page || 0); // 현재 페이지
     const perPage = 5; // 페이지 당 공원 수
     try {
-        const data = await ParkService.getRecommendPark(city, district, perPage, page);
-
-        res.json({ maxPage: (data.length % perPage) + 1, data });
+        const result = await ParkService.getRecommendPark(city, district, perPage, page);
+        res.json(result);
     } catch (e) {
         next(e);
     }
@@ -201,11 +200,11 @@ router.get('/recommend', async (req, res, next) => {
  */
 router.get('/search/:name', async (req, res, next) => {
     const { name } = req.params;
-    const page = Number(req.query.page || 1); // 현재 페이지
+    const page = Number(req.query.page || 0); // 현재 페이지
     const perPage = 5; // 페이지 당 공원 수
     try {
-        const data = await ParkService.getParkByName(name, perPage, page);
-        res.json({ maxPage: (data.length % perPage) + 1, data });
+        const result = await ParkService.getParkByName(name, perPage, page);
+        res.json(result);
     } catch (e) {
         next(e);
     }

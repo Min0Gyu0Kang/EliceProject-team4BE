@@ -38,15 +38,18 @@ class ParkService {
 
     // 공원 이름 검색
     static async getParkByName(name, perPage, page) {
-        const { rows } = await ParkModel.readParkByName(name, perPage, page);
-        return rows;
+        const { maxPage, data } = await ParkModel.readParkByName(name, perPage, page);
+        return { maxPage: Math.ceil(maxPage.rows.length / perPage) - 1, page, data: data.rows };
     }
 
+    // 추천 공원 조회
     static async getRecommendPark(city, district, perPage, page) {
-        const { rows } = await ParkModel.readRecommendPark(city, district, perPage, page);
-        return rows;
+        const { maxPage, data } = await ParkModel.readRecommendPark(city, district, perPage, page);
+
+        return { maxPage: Math.ceil(maxPage.rows.length / perPage) - 1, page, data: data.rows };
     }
 
+    // 공원 보유시설
     static async getFacilities(park_id) {
         const { rows } = await ParkModel.readFacilitiesByParkId(park_id);
         return rows;
