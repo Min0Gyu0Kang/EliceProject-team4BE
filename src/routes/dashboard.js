@@ -13,12 +13,13 @@ Date        Author   Status    Description
 2024.06.12  박수정   Modified  Scatter API 수정
 2024.06.12  이유민   Modified  Tinybar, Linebar API 수정
 2024.06.13  박수정   Modified  API 문서 자동화 기능 추가
-2024.06.13  이유민   Modified      Tinybar API 수정
+2024.06.13  이유민   Modified  Tinybar API 수정
 2024.06.14  박수정   Modified  CommonJS 모듈에서 ES6 모듈로 변경
 2024.06.14  박수정   Modified  Scatter API 분리 - routes, service, model
+2024.06.14  이유민   Modified  Linebar, Tinybar 추가
+2024.06.14  이유민   Modified  ES6 모듈로 변경
+2024.06.14  이유민   Modified  대시보드 병합
 */
-
-const { dashboardService } = require('../services/dashboard');
 import { Router } from 'express';
 import serviceInstance from '../services/dashboard.js';
 import { NotFound } from '../utils/errors.js';
@@ -117,109 +118,13 @@ const router = Router();
  */
 router.get('/', async (req, res, next) => {
     try {
-        const result = await dashboardService.getLinebar();
-        res.json(result);
-    } catch (e) {
-        next(e);
-    }
-});
+        // Linebar
+        const linebar = await serviceInstance.getLinebar();
 
-// 전국 공원의 노후화 비율 API
-/**
- * @swagger
- * paths:
- *  /dashboard/tinybar:
- *   get:
- *    summary: "tinybar 차트"
- *    tags:
- *    - dashboard
- *    description: "전국 공원의 노후화 비율 정보 GET"
- *    responses:
- *     200:
- *      description: 정보 조회 성공
- *      schema:
- *       properties:
- *        name:
- *         type: string
- *         description: 해당 데이터의 이름
- *        percentage:
- *         type: number
- *         format: float
- *         description: 해당 데이터의 비율
- *        date:
- *         type: string
- *         description: 기준 날짜
- *     500:
- *      description: 서버 오류
- *      schema:
- *       properties:
- *         message:
- *          type: string
- */
-router.get('/tinybar', async (req, res, next) => {
-    try {
-        const result = await dashboardService.getTinybar();
+        // Tinybar
+        const tinybar = await serviceInstance.getTinybar();
 
-        res.json(result);
-    } catch (e) {
-        next(e);
-    }
-});
-
-// 대시보드 산점도(Scatter) 차트 API
-// 천 명당 공원 면적 대비 지역 별 녹지환경 만족도
-/**
- * @swagger
- * paths:
- *  /dashboard/scatter:
- *   get:
- *    summary: 'Scatter 차트 API'
- *    tags:
- *    - dashboard
- *    description: '천 명당 공원 면적 대비 지역 별 녹지환경 만족도 API 정보 GET'
- *    responses:
- *     200:
- *      description: 정보 조회 성공
- *      schema:
- *       properties:
- *        city:
- *         type: string
- *         description: 시도
- *        park_area_per_thousand:
- *         type: number
- *         format: float
- *         description: 2022년 천 명당 공원 면적
- *        satisfaction:
- *         type: number
- *         format: float
- *         description: 2022년 지역 별 녹지환경 만족도
- *     400:
- *      description: 잘못된 요청
- *      schema:
- *       type: object
- *       properties:
- *        error:
- *         type: string
- *         example: '데이터가 존재하지 않습니다.'
- *     404:
- *      description: 요청한 리소스를 찾을 수 없음
- *      schema:
- *       type: object
- *       properties:
- *        error:
- *         type: string
- *         example: '요청한 리소스를 찾을 수 없습니다.'
- *     500:
- *      description: 서버 내부 오류
- *      schema:
- *       type: object
- *       properties:
- *        error:
- *          type: string
- *          example: "서버 내부 에러가 발생했습니다."
- */
-router.get('/scatter', async (req, res, next) => {
-    try {
+        // Scatter
         const scatter = await serviceInstance.getScatter();
 
         // Service로부터 넘어온 데이터에 대한 유효성 검사
@@ -230,8 +135,7 @@ router.get('/scatter', async (req, res, next) => {
         const data = {
             scatter,
         };
-
-        res.json(data);
+        res.json({ linebar, tinybar, scatter });
     } catch (e) {
         next(e);
     }
