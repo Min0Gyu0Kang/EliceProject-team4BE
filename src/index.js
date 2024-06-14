@@ -7,6 +7,8 @@ dotenv.config();
 
 import dashboard from './routes/dashboard.js';
 import map from './routes/map.js';
+import park from './routes/park.js';
+import parkReview from './routes/parkReview.js';
 
 const app = express();
 
@@ -20,11 +22,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/dashboard', dashboard);
 app.use('/map', map);
+app.use('/park', park);
+app.use('/park-review', parkReview);
 
 // 에러 처리
 app.use((error, req, res, next) => {
     const { name, message, status, data } = error;
-    console.error(error.stack);
 
     if (status >= 500) {
         console.error(name, message);
