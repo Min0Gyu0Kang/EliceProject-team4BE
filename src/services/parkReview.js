@@ -65,6 +65,11 @@ class ParkReviewService {
 
     // 리뷰 상세보기 - 공원명, 공원 평균 점수
     static async getReview(park_id) {
+        const check = await ParkModel.checkParkById(park_id);
+        if (check.rows.length == 0) {
+            throw new NotFound();
+        }
+
         const { rows } = await ParkReviewModel.readReviewByParkId(park_id);
         rows.map(data => (data.average_review = parseFloat(data.average_review)));
         return rows;
@@ -72,6 +77,11 @@ class ParkReviewService {
 
     // 리뷰 상세보기 - 리뷰 작성자, 별점, 내용
     static async getReviewDetail(park_id) {
+        const check = await ParkModel.checkParkById(park_id);
+        if (check.rows.length == 0) {
+            throw new NotFound();
+        }
+
         const { rows } = await ParkReviewModel.readReviewDetailByParkId(park_id);
         return rows;
     }
