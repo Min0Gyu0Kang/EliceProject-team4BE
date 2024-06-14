@@ -1,5 +1,5 @@
 /**File Name : map
-Description : 지도 API
+Description : 지도 API - Route
 Author : 박수정
 
 History
@@ -7,12 +7,13 @@ Date        Author   Status     Description
 2024.06.13  박수정   Created
 2024.06.13  박수정   Modified   지도 API 추가
 2024.06.13  박수정   Modified   API 문서 자동화 기능 추가
-2024.06.14  박수정   Modified  CommonJS 모듈에서 ES6 모듈로 변경
+2024.06.14  박수정   Modified   CommonJS 모듈에서 ES6 모듈로 변경
+2024.06.15  박수정   Modified   지도 API 분리 - routes, service, model
 */
 
 import { Router } from 'express';
-import db from '../models/psql.js';
-import { BadRequest, NotFound } from '../utils/errors.js';
+import MapService from '../services/map.js';
+import { validateServiceData } from '../utils/validations.js';
 
 const router = Router();
 
@@ -24,7 +25,7 @@ const router = Router();
  *   get:
  *    summary: '지도 API'
  *    tags:
- *    - dashboard
+ *    - map
  *    description: '지도 API 정보 GET'
  *    responses:
  *     200:
@@ -72,33 +73,12 @@ const router = Router();
  */
 router.get('/', async (req, res, next) => {
     try {
-        const { rows } = await db.query(`
-            SELECT p.name, pr.address, pr.latitude, pr.longitude
-            FROM park p
-            JOIN park_region pr
-                ON p.park_region_id = pr.id
-        `);
+        const map = await MapService.getMap();
 
-        // 쿼리에 대한 유효성 검사
-        if (!rows || rows.length === 0) {
-            return next(new NotFound());
-        }
+        // Service로부터 넘어온 데이터에 대한 유효성 검사
+        validateServiceData(map);
 
-        const data = rows.map(row => {
-            // 각 데이터에 대한 유효성 검사
-            if (!row.name || !row.address || !row.latitude || !row.longitude) {
-                return next(new BadRequest('데이터가 존재하지 않습니다.'));
-            }
-
-            return {
-                name: row.name,
-                address: row.address,
-                latitude: row.latitude,
-                longitude: row.longitude,
-            };
-        });
-
-        res.json(data);
+        res.json(map);
     } catch (e) {
         next(e);
     }
