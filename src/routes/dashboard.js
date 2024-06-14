@@ -19,14 +19,14 @@ Date        Author   Status    Description
 2024.06.14  이유민   Modified  Linebar, Tinybar 추가
 2024.06.14  이유민   Modified  ES6 모듈로 변경
 2024.06.14  이유민   Modified  대시보드 병합
+2024.06.15  박수정   Modified  전체적인 코드 통일 및 유효성 검사 코드 분리
 */
 import { Router } from 'express';
-import serviceInstance from '../services/dashboard.js';
-import { NotFound } from '../utils/errors.js';
+import DashboardService from '../services/dashboard.js';
+import { validateServiceData } from '../utils/validations.js';
 
 const router = Router();
 
-// 대시보드 차트 API
 /**
  * @swagger
  * paths:
@@ -118,23 +118,13 @@ const router = Router();
  */
 router.get('/', async (req, res, next) => {
     try {
-        // Linebar
-        const linebar = await serviceInstance.getLinebar();
-
-        // Tinybar
-        const tinybar = await serviceInstance.getTinybar();
-
-        // Scatter
-        const scatter = await serviceInstance.getScatter();
+        const linebar = await DashboardService.getLinebar(); // Linebar
+        const tinybar = await DashboardService.getTinybar(); // Tinybar
+        const scatter = await DashboardService.getScatter(); // Scatter
 
         // Service로부터 넘어온 데이터에 대한 유효성 검사
-        if (!scatter || scatter.length === 0) {
-            return next(new NotFound());
-        }
+        validateServiceData([linebar, tinybar, scatter]);
 
-        const data = {
-            scatter,
-        };
         res.json({ linebar, tinybar, scatter });
     } catch (e) {
         next(e);
