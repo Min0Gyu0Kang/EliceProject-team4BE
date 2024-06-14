@@ -1,10 +1,12 @@
-const express = require('express');
-const { swaggerUi, specs } = require('./utils/swagger');
-require('dotenv').config();
-const bodyParser = require('body-parser');
+import express from 'express';
+import { swaggerUi, specs } from './utils/swagger.js';
+import dotenv from 'dotenv';
+import bodyParser from 'body-parser';
 
-const dashboard = require('./routes/dashboard');
-const map = require('./routes/map');
+dotenv.config();
+
+import dashboard from './routes/dashboard.js';
+import map from './routes/map.js';
 
 const app = express();
 
