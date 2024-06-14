@@ -7,11 +7,12 @@ Date        Author   Status     Description
 2024.06.13  박수정   Created
 2024.06.13  박수정   Modified   지도 API 추가
 2024.06.13  박수정   Modified   API 문서 자동화 기능 추가
+2024.06.14  박수정   Modified  CommonJS 모듈에서 ES6 모듈로 변경
 */
 
-const { Router } = require('express');
-const db = require('../models/psql');
-const { BadRequest, NotFound } = require('../utils/errors');
+import { Router } from 'express';
+import db from '../models/psql.js';
+import { BadRequest, NotFound } from '../utils/errors.js';
 
 const router = Router();
 
@@ -78,8 +79,6 @@ router.get('/', async (req, res, next) => {
                 ON p.park_region_id = pr.id
         `);
 
-        console.log(rows);
-
         // 쿼리에 대한 유효성 검사
         if (!rows || rows.length === 0) {
             return next(new NotFound());
@@ -105,4 +104,4 @@ router.get('/', async (req, res, next) => {
     }
 });
 
-module.exports = router;
+export default router;
