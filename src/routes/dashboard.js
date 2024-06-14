@@ -1,6 +1,6 @@
 /**
 File Name : dashboard
-Description : 대시보드 차트 API
+Description : 대시보드 차트 API - Route
 Author : 이유민
 
 History
