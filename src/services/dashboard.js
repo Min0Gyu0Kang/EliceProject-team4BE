@@ -9,12 +9,42 @@ Date        Author   Status    Description
 2024.06.14  박수정   Modified  CommonJS 모듈에서 ES6 모듈로 변경
 2024.06.14  박수정   Modified  Scatter API 분리 - routes, service, model
 2024.06.14  이유민   Modified  Linebar, Tinybar 추가
+2024.06.14  이유민   Modified  ES6 모듈로 변경
 */
-const { dashboardModel } = require('../models/dashboard');
 
-class dashboardService {
-    static async getLinebar() {
-        const { rows } = await dashboardModel.readLinebar();
+import { DashboardModel } from '../models/dashboard.js';
+import { BadRequest, NotFound } from '../utils/errors.js';
+
+// Scatter 차트 데이터
+
+// 클래스 기반 코드
+class DashboardService {
+    async getScatter() {
+        const rows = await DashboardModel.getScatter();
+
+        // 쿼리에 대한 유효성 검사
+        if (!rows || rows.length === 0) {
+            return new NotFound();
+        }
+
+        const data = rows.map(row => {
+            // 각 데이터에 대한 유효성 검사
+            if (!row.city || !row.park_area_per_thousand || !row.satisfaction) {
+                return new BadRequest('데이터가 존재하지 않습니다.');
+            }
+
+            return {
+                city: row.city,
+                park_area_per_thousand: row.park_area_per_thousand,
+                satisfaction: row.satisfaction,
+            };
+        });
+
+        return data;
+    }
+
+    async getLinebar() {
+        const { rows } = await DashboardModel.getLinebar();
 
         const resData = rows.map(data => {
             const item = {
@@ -38,7 +68,7 @@ class dashboardService {
         return resData;
     }
 
-    static async getTinybar() {
+    async getTinybar() {
         function percentageCalc(data, filterValue, standard) {
             let res =
                 data.filter(dt =>
@@ -47,7 +77,7 @@ class dashboardService {
             return parseFloat((res * 100).toFixed(2));
         }
 
-        const { rows } = await dashboardModel.readTinybar();
+        const { rows } = await DashboardModel.getTinybar();
 
         const resData = [
             { name: '데이터 없음', percentage: percentageCalc(rows, 'N') },
@@ -69,40 +99,6 @@ class dashboardService {
         ];
 
         return resData;
-    }
-}
-
-module.exports = { dashboardService };
-
-import { getScatter } from '../models/dashboard.js';
-import { BadRequest, NotFound } from '../utils/errors.js';
-
-// Scatter 차트 데이터
-
-// 클래스 기반 코드
-class DashboardService {
-    async getScatter() {
-        const rows = await getScatter();
-
-        // 쿼리에 대한 유효성 검사
-        if (!rows || rows.length === 0) {
-            return new NotFound();
-        }
-
-        const data = rows.map(row => {
-            // 각 데이터에 대한 유효성 검사
-            if (!row.city || !row.park_area_per_thousand || !row.satisfaction) {
-                return new BadRequest('데이터가 존재하지 않습니다.');
-            }
-
-            return {
-                city: row.city,
-                park_area_per_thousand: row.park_area_per_thousand,
-                satisfaction: row.satisfaction,
-            };
-        });
-
-        return data;
     }
 }
 
