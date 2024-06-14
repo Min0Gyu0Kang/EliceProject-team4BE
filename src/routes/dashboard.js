@@ -18,6 +18,7 @@ Date        Author   Status    Description
 
 const { Router } = require('express');
 const db = require('../models/psql');
+const { BadRequest, NotFound } = require('../utils/errors');
 
 const router = Router();
 
