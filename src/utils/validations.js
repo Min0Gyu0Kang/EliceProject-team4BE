@@ -18,7 +18,7 @@ export function validateQueryAndField(rows, requiredFields) {
         return new NotFound();
     }
 
-    // 각 데이터 (항목의) 필드에 대한 유효성 검사
+    // 각 필드에 대한 유효성 검사
     const validatedData = rows.map(data => {
         for (const field of requiredFields) {
             if (!data[field]) {
