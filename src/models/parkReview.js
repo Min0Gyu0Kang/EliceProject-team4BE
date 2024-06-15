@@ -8,6 +8,7 @@ Date        Author   Status    Description
 2024.06.14  이유민   Created
 2024.06.14  이유민   Modified  Park-Review API 분리
 2024.06.14  이유민   Modified  ES6 모듈로 변경
+2024.06.15  이유민   Modified  readReviewById 수정
 */
 import db from '../models/psql.js';
 
@@ -23,7 +24,7 @@ class ParkReviewModel {
     // id 이용해서 리뷰 조회
     static async readReviewById(id) {
         return await db.query(`
-            SELECT id, deleted_at FROM public."park_review" WHERE id = ${id}
+            SELECT content, grade FROM public."park_review" WHERE id = ${id} AND deleted_at IS NULL;
             `);
     }
 

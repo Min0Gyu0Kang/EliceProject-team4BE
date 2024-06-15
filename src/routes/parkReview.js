@@ -8,6 +8,7 @@ Date        Author   Status    Description
 2024.06.14  이유민   Created
 2024.06.14  이유민   Modified  Park API 분리
 2024.06.14  이유민   Modified  ES6 모듈로 변경
+2024.06.15  이유민   Modified  리뷰 조회 추가
 */
 import { Router } from 'express';
 import ParkReviewService from '../services/parkReview.js';
@@ -207,6 +208,55 @@ router.delete('/:id', async (req, res, next) => {
 /**
  * @swagger
  * paths:
+ *  /park-review/{id}:
+ *   get:
+ *    summary: "공원 리뷰 조회 API"
+ *    tags:
+ *    - park-review
+ *    description: "공원 리뷰 정보 GET"
+ *    responses:
+ *     200:
+ *      description: 정보 조회 성공
+ *      schema:
+ *       properties:
+ *        content:
+ *         type: string
+ *         description: 리뷰 내용
+ *        grade:
+ *         type: integer
+ *         format: int32
+ *         description: 별점
+ *     404:
+ *       description: 요청한 리소스를 찾을 수 없음
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '요청한 리소스를 찾을 수 없습니다.'
+ *     500:
+ *       description: 서버 내부 오류
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '서버 내부 에러가 발생했습니다.'
+ */
+router.get('/:id', async (req, res, next) => {
+    const { id } = req.params;
+    try {
+        const result = await ParkReviewService.getReviewById(id);
+        res.json(result);
+    } catch (e) {
+        next(e);
+    }
+});
+
+// 해당 공원의 리뷰 상세보기
+/**
+ * @swagger
+ * paths:
  *  /park-review/details/{park_id}:
  *   get:
  *    summary: "공원 리뷰 상세보기 API"
@@ -231,7 +281,8 @@ router.delete('/:id', async (req, res, next) => {
  *            type: string
  *            description: 공원명
  *           average_review:
- *            type: string
+ *            type: number
+ *            format: float
  *            description: 평균 별점
  *        review:
  *         type: array

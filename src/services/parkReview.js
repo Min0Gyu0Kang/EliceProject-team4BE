@@ -8,6 +8,8 @@ Date        Author   Status    Description
 2024.06.14  이유민   Created
 2024.06.14  이유민   Modified  Park-Review API 분리
 2024.06.14  이유민   Modified  ES6 모듈로 변경
+2024.06.15  이유민   Modified  리뷰 조회 추가
+2024.06.15  이유민   Modified  유효성 검사 추가
 */
 import { ParkModel } from '../models/park.js';
 import { ParkReviewModel } from '../models/parkReview.js';
@@ -28,7 +30,7 @@ class ParkReviewService {
         }
 
         const { rows } = await ParkModel.checkParkById(park_id);
-        if (rows.length == 0) {
+        if (rows.length === 0) {
             throw new NotFound();
         }
 
@@ -46,7 +48,7 @@ class ParkReviewService {
         }
 
         const { rows } = await ParkReviewModel.readReviewById(id);
-        if (rows.length == 0 || rows[0].deleted_at != null) {
+        if (rows.length === 0) {
             throw new NotFound();
         }
 
@@ -56,17 +58,27 @@ class ParkReviewService {
     // 리뷰 삭제
     static async deleteReview(id) {
         const { rows } = await ParkReviewModel.readReviewById(id);
-        if (rows.length == 0 || rows[0].deleted_at != null) {
+        if (rows.length === 0) {
             throw new NotFound();
         }
 
         return await ParkReviewModel.deleteReviewById(id);
     }
 
+    // 리뷰 조회
+    static async getReviewById(id) {
+        const { rows } = await ParkReviewModel.readReviewById(id);
+        if (rows.length === 0) {
+            throw new NotFound();
+        }
+
+        return rows;
+    }
+
     // 리뷰 상세보기 - 공원명, 공원 평균 점수
     static async getReview(park_id) {
         const check = await ParkModel.checkParkById(park_id);
-        if (check.rows.length == 0) {
+        if (check.rows.length === 0) {
             throw new NotFound();
         }
 
@@ -78,7 +90,7 @@ class ParkReviewService {
     // 리뷰 상세보기 - 리뷰 작성자, 별점, 내용
     static async getReviewDetail(park_id) {
         const check = await ParkModel.checkParkById(park_id);
-        if (check.rows.length == 0) {
+        if (check.rows.length === 0) {
             throw new NotFound();
         }
 
@@ -87,5 +99,4 @@ class ParkReviewService {
     }
 }
 
-const serviceInstance = new ParkReviewService(); // 싱글톤 인스턴스 생성
 export default ParkReviewService;
