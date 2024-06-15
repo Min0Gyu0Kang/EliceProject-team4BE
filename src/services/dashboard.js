@@ -21,7 +21,7 @@ class DashboardService {
     static async getLinebar() {
         const { rows } = await DashboardModel.getLinebar();
 
-        // 쿼리 및 각 데이터 (항목의) 필드에 대한 유효성 검사
+        // 쿼리 및 각 필드에 대한 유효성 검사
         const requiredFields = ['year', 'capita'];
         const validatedRows = validateQueryAndField(rows, requiredFields);
 
@@ -51,7 +51,7 @@ class DashboardService {
     static async getTinybar() {
         const { rows } = await DashboardModel.getTinybar();
 
-        // 쿼리 및 각 데이터 (항목의) 필드에 대한 유효성 검사
+        // 쿼리 및 각 필드에 대한 유효성 검사
         const requiredFields = ['will_be_old_in_10_years', 'is_old'];
         const validatedRows = validateQueryAndField(rows, requiredFields);
 
@@ -95,7 +95,7 @@ class DashboardService {
     static async getScatter() {
         const { rows } = await DashboardModel.getScatter();
 
-        // 쿼리 및 각 데이터 (항목의) 필드에 대한 유효성 검사
+        // 쿼리 및 각 필드에 대한 유효성 검사
         const requiredFields = ['city', 'park_area_per_thousand', 'satisfaction'];
         const validatedRows = validateQueryAndField(rows, requiredFields);
 
