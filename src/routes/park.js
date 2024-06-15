@@ -8,6 +8,7 @@ Date        Author   Status    Description
 2024.06.11  이유민   Created
 2024.06.14  이유민   Modified  Park API 분리
 2024.06.14  이유민   Modified  ES6 모듈로 변경
+2024.06.14  이유민   Modified  추천 공원 facilities 추가
 */
 import { Router } from 'express';
 import ParkService from '../services/park.js';

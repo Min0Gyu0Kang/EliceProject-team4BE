@@ -9,6 +9,7 @@ Date        Author   Status    Description
 2024.06.14  이유민   Modified  Park API 분리
 2024.06.14  이유민   Modified  ES6 모듈로 변경
 2024.06.15  이유민   Modified  유효성 검사 추가
+2024.06.14  이유민   Modified  추천 공원 facilities 추가
 2024.06.15  이유민   Modified  페이지네이션 수정
 */
 import { ParkModel } from '../models/park.js';
