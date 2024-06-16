@@ -9,6 +9,7 @@ Date        Author   Status    Description
 2024.06.14  이유민   Modified  Park API 분리
 2024.06.14  이유민   Modified  ES6 모듈로 변경
 2024.06.15  이유민   Modified  리뷰 조회 추가
+2024.06.16  이유민   Modified  id, user_id varchar로 변경
 */
 import { Router } from 'express';
 import ParkReviewService from '../services/parkReview.js';
@@ -78,7 +79,7 @@ const router = Router();
 router.post('/:park_id', async (req, res, next) => {
     const { park_id } = req.params;
     const { content, grade } = req.body;
-    const user_id = 1; // 회원가입, 로그인 구현 안 된 상태라 임의로 넣음
+    const user_id = '123asdf'; // 회원가입, 로그인 구현 안 된 상태라 임의로 넣음
 
     try {
         await ParkReviewService.addReview(park_id, user_id, content, grade);

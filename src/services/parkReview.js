@@ -10,13 +10,14 @@ Date        Author   Status    Description
 2024.06.14  이유민   Modified  ES6 모듈로 변경
 2024.06.15  이유민   Modified  리뷰 조회 추가
 2024.06.15  이유민   Modified  유효성 검사 추가
+2024.06.16  이유민   Modified  id, user_id varchar로 변경
 */
 import { ParkModel } from '../models/park.js';
 import { ParkReviewModel } from '../models/parkReview.js';
 import { BadRequest, NotFound } from '../utils/errors.js';
 import { customAlphabet } from 'nanoid';
 
-const nanoid = customAlphabet('0123456789', 6);
+const nanoid = customAlphabet('0123456789ABCDEFG', 8);
 
 class ParkReviewService {
     // 리뷰 생성

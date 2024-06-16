@@ -9,6 +9,7 @@ Date        Author   Status    Description
 2024.06.14  이유민   Modified  Park-Review API 분리
 2024.06.14  이유민   Modified  ES6 모듈로 변경
 2024.06.15  이유민   Modified  readReviewById 수정
+2024.06.16  이유민   Modified  id, user_id varchar로 변경
 */
 import db from '../models/psql.js';
 
@@ -17,27 +18,27 @@ class ParkReviewModel {
     static async createReview(id, park_id, user_id, content, grade) {
         return await db.query(`
             INSERT INTO public."park_review" (id, park_id, user_id, content, grade)  
-            VALUES (${id}, ${park_id}, ${user_id}, '${content}', ${grade});
+            VALUES ('${id}', ${park_id}, '${user_id}', '${content}', ${grade});
             `);
     }
 
     // id 이용해서 리뷰 조회
     static async readReviewById(id) {
         return await db.query(`
-            SELECT content, grade FROM public."park_review" WHERE id = ${id} AND deleted_at IS NULL;
+            SELECT content, grade FROM public."park_review" WHERE id = '${id}' AND deleted_at IS NULL;
             `);
     }
 
     // id 이용해서 리뷰 수정
     static async updateReviewById(id, content, grade) {
         return await db.query(`
-            UPDATE public."park_review" SET content = '${content}', grade = ${grade}, updated_at = NOW() WHERE id=${id};
+            UPDATE public."park_review" SET content = '${content}', grade = ${grade}, updated_at = NOW() WHERE id='${id}';
             `);
     }
 
     // id 이용해서 리뷰 삭제
     static async deleteReviewById(id) {
-        return await db.query(`UPDATE public."park_review" SET deleted_at = NOW() WHERE id = ${id};`);
+        return await db.query(`UPDATE public."park_review" SET deleted_at = NOW() WHERE id = '${id}';`);
     }
 
     // park id 이용해서 리뷰 조회
