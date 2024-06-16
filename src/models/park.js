@@ -11,6 +11,7 @@ Date        Author   Status    Description
 2024.06.14  이유민   Modified  주석 추가
 2024.06.14  이유민   Modified  deleted_at 확인 코드 추가
 2024.06.14  이유민   Modified  추천 공원 facilities 추가
+2024.06.16  이유민   Modified  추천 공원 수정
 */
 import db from '../models/psql.js';
 
@@ -70,7 +71,7 @@ class ParkModel {
                 ON park.local_government_id = government.id  
                 LEFT JOIN public."park_review" AS review  
                 ON park.id = review.park_id  
-                WHERE park.id = '${id}' AND park.deleted_at IS NULL
+                WHERE park.id = ${id} AND park.deleted_at IS NULL
                 GROUP BY park.id, region.address, government.phone_number;
                 `);
     }
@@ -79,12 +80,22 @@ class ParkModel {
     static async readRecommendPark(city, district, facilities, perPage, page) {
         // 세종특별자치시는 시군구가 따로 없기 때문에 조건문 이용해서 Query 완성
         let whereQuery = `WHERE legal_region.city = '${city}'`;
-        if (city != '세종특별자치시') {
+        if (district && city != '세종특별자치시') {
             whereQuery += `AND legal_region.district = '${district}'`;
         }
 
         let havingQuery = '';
+        let facilityJoinQuery = '';
         if (facilities.length > 0) {
+            facilityJoinQuery = `
+                LEFT JOIN public."park_facilities" as facilities
+                ON park.id = facilities.park_id
+                JOIN public."park_facilities_categories" as categories
+                ON facilities.park_facilities_categories_id = categories.id
+                JOIN public."park_facilities_categories" as parent_categories
+                ON categories.parent_category_id = parent_categories.id
+                `;
+
             havingQuery =
                 `HAVING ` +
                 facilities
@@ -96,7 +107,7 @@ class ParkModel {
         }
 
         const query = `
-                SELECT park.id, park.name, region.address, ROUND(AVG(review.grade), 1) AS average_review
+                SELECT park.id, park.name, region.address, ROUND(AVG(review.grade), 1) AS average_review  
                 FROM public."park" AS park  
                 JOIN public."park_region" AS region  
                 ON park.park_region_id = region.id  
@@ -104,13 +115,8 @@ class ParkModel {
                 ON region.park_legal_region_id = legal_region.id  
                 LEFT JOIN public."park_review" AS review  
                 ON park.id = review.park_id  
-                LEFT JOIN public."park_facilities" as facilities
-                ON park.id = facilities.park_id
-                JOIN public."park_facilities_categories" as categories
-                ON facilities.park_facilities_categories_id = categories.id
-                JOIN public."park_facilities_categories" as parent_categories
-                ON categories.parent_category_id = parent_categories.id
-                ${whereQuery} AND park.deleted_at IS NULL
+                ${facilityJoinQuery}
+                ${whereQuery}  
                 GROUP BY park.id, region.address
                 ${havingQuery}
         `;
@@ -130,7 +136,7 @@ class ParkModel {
                 ON facilities.park_facilities_categories_id = category1.id
                 JOIN public."park_facilities_categories" AS parent
                 ON category1.parent_category_id = parent.id
-                WHERE facilities.park_id = '${park_id}' AND facilities.deleted_at IS NULL;
+                WHERE facilities.park_id = ${park_id} AND facilities.deleted_at IS NULL;
                 `);
     }
 }
