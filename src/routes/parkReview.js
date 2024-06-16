@@ -10,6 +10,7 @@ Date        Author   Status    Description
 2024.06.14  이유민   Modified  ES6 모듈로 변경
 2024.06.15  이유민   Modified  리뷰 조회 추가
 2024.06.16  이유민   Modified  id, user_id varchar로 변경
+2024.06.16  이유민   Modified  API 문서 수정
 */
 import { Router } from 'express';
 import ParkReviewService from '../services/parkReview.js';
@@ -33,16 +34,19 @@ const router = Router();
  *        type: integer
  *       required: true
  *       description: 공원 ID
- *    requestBody:
- *     required: true
- *     schema:
- *      properties:
- *       content:
+ *     - in: body
+ *       name: content
+ *       schema:
  *        type: string
- *        description: 리뷰 내용
- *       grade:
- *        type: number
- *        description: 리뷰 별점
+ *       required: true
+ *       description: 리뷰 내용
+ *     - in: body
+ *       name: grade
+ *       schema:
+ *        type: integer
+ *        format: int32
+ *       required: true
+ *       description: 리뷰 별점
  *    responses:
  *     200:
  *      description: 리뷰 작성 성공
@@ -104,7 +108,7 @@ router.post('/:park_id', async (req, res, next) => {
  *     - in: path
  *       name: id
  *       schema:
- *        type: integer
+ *        type: string
  *       required: true
  *       description: 해당 리뷰 ID
  *    responses:
@@ -166,7 +170,7 @@ router.put('/:id', async (req, res, next) => {
  *     - in: path
  *       name: id
  *       schema:
- *        type: integer
+ *        type: string
  *       required: true
  *       description: 해당 리뷰 ID
  *    responses:
@@ -215,6 +219,13 @@ router.delete('/:id', async (req, res, next) => {
  *    tags:
  *    - park-review
  *    description: "공원 리뷰 정보 GET"
+ *    parameters:
+ *     - in: path
+ *       name: id
+ *       schema:
+ *        type: string
+ *       required: true
+ *       description: 리뷰 ID
  *    responses:
  *     200:
  *      description: 정보 조회 성공
@@ -264,6 +275,13 @@ router.get('/:id', async (req, res, next) => {
  *    tags:
  *    - park-review
  *    description: "공원 리뷰 상세 정보 GET"
+ *    parameters:
+ *     - in: path
+ *       name: park_id
+ *       schema:
+ *        type: integer
+ *       required: true
+ *       description: 공원 ID
  *    responses:
  *     200:
  *      description: 정보 조회 성공
