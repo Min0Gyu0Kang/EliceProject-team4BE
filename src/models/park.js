@@ -12,6 +12,9 @@ Date        Author   Status    Description
 2024.06.14  이유민   Modified  deleted_at 확인 코드 추가
 2024.06.14  이유민   Modified  추천 공원 facilities 추가
 2024.06.16  이유민   Modified  추천 공원 수정
+2024.06.17  이유민   Modified  별점순 정렬 추가
+2024.06.17  이유민   Modified  별점 기본 값 추가
+2024.06.17  이유민   Modified  user -> users
 */
 import db from '../models/psql.js';
 
@@ -45,7 +48,8 @@ class ParkModel {
     // 이름으로 정보 조회 - 공원 검색
     static async readParkByName(name, perPage, page) {
         const query = `
-                SELECT park.id, park.name, region.address, ROUND(AVG(review.grade), 1) AS average_review  
+                SELECT park.id, park.name, region.address
+                , COALESCE(ROUND(AVG(review.grade), 1)::numeric, 0.0) AS average_review  
                 FROM public."park" AS park  
                 JOIN public."park_region" AS region  
                 ON park.park_region_id = region.id  
@@ -53,6 +57,7 @@ class ParkModel {
                 ON park.id = review.park_id  
                 WHERE name LIKE '%${name}%' AND park.deleted_at IS NULL
                 GROUP BY park.id, region.address  
+                ORDER BY average_review DESC, park.id ASC
                 `;
         const maxPage = await db.query(`${query};`);
         const data = await db.query(`${query} LIMIT ${perPage} OFFSET ${5 * page};`);
@@ -63,7 +68,9 @@ class ParkModel {
     // 공원 id로 정보 조회
     static async readParkById(id) {
         return await db.query(`
-                SELECT park.id, park.name, park.type, region.address, government.phone_number, ROUND(AVG(review.grade), 1) AS average_review, COUNT(review.grade) AS count_review  
+                SELECT park.id, park.name, park.type, region.address, government.phone_number
+                , COALESCE(ROUND(AVG(review.grade), 1)::numeric, 0.0) AS average_review
+                , COUNT(review.grade) AS count_review  
                 FROM public."park" AS park  
                 JOIN public."park_region" AS region  
                 ON park.park_region_id = region.id  
@@ -107,7 +114,8 @@ class ParkModel {
         }
 
         const query = `
-                SELECT park.id, park.name, region.address, ROUND(AVG(review.grade), 1) AS average_review  
+                SELECT park.id, park.name, region.address
+                , COALESCE(ROUND(AVG(review.grade), 1)::numeric, 0.0) AS average_review  
                 FROM public."park" AS park  
                 JOIN public."park_region" AS region  
                 ON park.park_region_id = region.id  
@@ -119,6 +127,7 @@ class ParkModel {
                 ${whereQuery}  
                 GROUP BY park.id, region.address
                 ${havingQuery}
+                ORDER BY average_review DESC, park.id ASC
         `;
 
         const maxPage = await db.query(`${query};`);
@@ -130,7 +139,7 @@ class ParkModel {
     // 공원 ID에 따른 보유시설 조회
     static async readFacilitiesByParkId(park_id) {
         return await db.query(`
-                SELECT facilities.park_id, parent.name AS category, category1.name  
+                SELECT parent.name AS category, category1.name  
                 FROM public."park_facilities" AS facilities  
                 JOIN public."park_facilities_categories" AS category1
                 ON facilities.park_facilities_categories_id = category1.id

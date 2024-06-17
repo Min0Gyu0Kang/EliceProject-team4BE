@@ -10,15 +10,16 @@ Date        Author   Status    Description
 2024.06.14  이유민   Modified  ES6 모듈로 변경
 2024.06.15  이유민   Modified  readReviewById 수정
 2024.06.16  이유민   Modified  id, user_id varchar로 변경
+2024.06.17  이유민   Modified  user -> users
 */
 import db from '../models/psql.js';
 
 class ParkReviewModel {
     // 리뷰 생성
-    static async createReview(id, park_id, user_id, content, grade) {
+    static async createReview(id, park_id, users_id, content, grade) {
         return await db.query(`
-            INSERT INTO public."park_review" (id, park_id, user_id, content, grade)  
-            VALUES ('${id}', ${park_id}, '${user_id}', '${content}', ${grade});
+            INSERT INTO public."park_review" (id, park_id, users_id, content, grade)  
+            VALUES ('${id}', ${park_id}, '${users_id}', '${content}', ${grade});
             `);
     }
 
@@ -58,8 +59,8 @@ class ParkReviewModel {
         return await db.query(`
                 SELECT users.nickname, review.grade, review.content
                 FROM public."park_review" AS review  
-                JOIN public."user" AS users  
-                ON review.user_id = users.id  
+                JOIN public."users" AS users  
+                ON review.users_id = users.id  
                 WHERE review.park_id = ${park_id} AND review.deleted_at IS NULL;
                 `);
     }

@@ -11,6 +11,9 @@ Date        Author   Status    Description
 2024.06.15  이유민   Modified  유효성 검사 추가
 2024.06.14  이유민   Modified  추천 공원 facilities 추가
 2024.06.15  이유민   Modified  페이지네이션 수정
+2024.06.17  이유민   Modified  별점순 정렬 추가
+2024.06.17  이유민   Modified  별점 실수형으로 변환
+2024.06.17  이유민   Modified  user -> users
 */
 import { ParkModel } from '../models/park.js';
 import { NotFound } from '../utils/errors.js';
@@ -51,7 +54,12 @@ class ParkService {
         if (rows.length === 0) {
             throw new NotFound();
         }
+        rows.map(data => {
+            data.average_review = parseFloat(data.average_review);
+            data.count_review = parseInt(data.count_review);
 
+            return data;
+        });
         return rows;
     }
 
@@ -66,7 +74,10 @@ class ParkService {
      */
     static async getParkByName(name, perPage, page) {
         const { maxPage, data } = await ParkModel.readParkByName(name, perPage, page - 1);
-        return { maxPage: Math.ceil(maxPage.rows.length / perPage), page, data: data.rows };
+
+        data.rows.map(dt => (dt.average_review = parseFloat(dt.average_review)));
+
+        return { maxPage: Math.ceil(maxPage.rows.length / perPage), page, park: data.rows };
     }
 
     // 추천 공원 조회
@@ -81,7 +92,9 @@ class ParkService {
     static async getRecommendPark(city, district, facilities, perPage, page) {
         const { maxPage, data } = await ParkModel.readRecommendPark(city, district, facilities, perPage, page - 1);
 
-        return { maxPage: Math.ceil(maxPage.rows.length / perPage), page, data: data.rows };
+        data.rows.map(dt => (dt.average_review = parseFloat(dt.average_review)));
+
+        return { maxPage: Math.ceil(maxPage.rows.length / perPage), page, park: data.rows };
     }
 
     // 공원 보유시설

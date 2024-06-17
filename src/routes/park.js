@@ -9,6 +9,8 @@ Date        Author   Status    Description
 2024.06.14  이유민   Modified  Park API 분리
 2024.06.14  이유민   Modified  ES6 모듈로 변경
 2024.06.14  이유민   Modified  추천 공원 facilities 추가
+2024.06.17  이유민   Modified  공원 조회 수정
+2024.06.17  이유민   Modified  user -> users
 */
 import { Router } from 'express';
 import ParkService from '../services/park.js';
@@ -161,7 +163,7 @@ router.get('/recommend/city/:city', async (req, res, next) => {
  *         type: integer
  *         format: int32
  *         description: 현재 페이지
- *        data:
+ *        park:
  *         type: array
  *         items:
  *          type: object
@@ -238,7 +240,7 @@ router.get('/recommend', async (req, res, next) => {
  *         type: integer
  *         format: int32
  *         description: 현재 페이지
- *        data:
+ *        park:
  *         type: array
  *         items:
  *          type: object
@@ -333,10 +335,6 @@ router.get('/search/:name', async (req, res, next) => {
  *         items:
  *          type: object
  *          properties:
- *           id:
- *            type: integer
- *            format: int32
- *            description: 공원 ID
  *           category:
  *            type: string
  *            description: 보유시설 카테고리

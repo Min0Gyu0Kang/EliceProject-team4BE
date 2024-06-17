@@ -11,6 +11,7 @@ Date        Author   Status    Description
 2024.06.15  이유민   Modified  리뷰 조회 추가
 2024.06.15  이유민   Modified  유효성 검사 추가
 2024.06.16  이유민   Modified  id, user_id varchar로 변경
+2024.06.17  이유민   Modified  user -> users
 */
 import { ParkModel } from '../models/park.js';
 import { ParkReviewModel } from '../models/parkReview.js';
@@ -21,7 +22,7 @@ const nanoid = customAlphabet('0123456789ABCDEFG', 8);
 
 class ParkReviewService {
     // 리뷰 생성
-    static async addReview(park_id, user_id, content, grade) {
+    static async addReview(park_id, users_id, content, grade) {
         if (!content || !grade) {
             throw new BadRequest();
         }
@@ -35,7 +36,7 @@ class ParkReviewService {
             throw new NotFound();
         }
 
-        return await ParkReviewModel.createReview(nanoid(), park_id, user_id, content, grade);
+        return await ParkReviewModel.createReview(nanoid(), park_id, users_id, content, grade);
     }
 
     // 리뷰 수정
