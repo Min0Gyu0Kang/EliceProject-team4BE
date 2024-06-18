@@ -6,12 +6,13 @@ Author : 박수정
 History
 Date        Author   Status    Description
 2024.06.15  박수정   Created
-2024.06.15  박수정   Modified  Dashboard에 대한 유효성 검사 미들웨어 추가
+2024.06.15  박수정   Modified  유효성 검사 미들웨어 추가
+2024.06.18  박수정   Modified  Route에서의 유효성 검사 수정
 */
 
 import { BadRequest, NotFound } from './errors.js';
 
-// Dashboard의 Service에서의 유효성 검사
+// Service에서의 유효성 검사
 export function validateQueryAndField(rows, requiredFields) {
     // 쿼리에 대한 유효성 검사
     if (!rows || rows.length === 0) {
@@ -31,13 +32,19 @@ export function validateQueryAndField(rows, requiredFields) {
     return validatedData;
 }
 
-// Dashboard의 Route에서의 유효성 검사
+// Route에서의 유효성 검사
 export function validateServiceData(datas) {
-    // Service로부터 넘어온 데이터에 대한 유효성 검사
-
-    for (const data of datas) {
-        if (!data || data.length === 0) {
-            throw new NotFound();
+    // data가 여러 개인 경우
+    if (Array.isArray(datas)) {
+        for (const data of datas) {
+            if (!data || data.length === 0) {
+                throw new NotFound();
+            }
         }
+    }
+
+    // data가 1개인 경우
+    if (!datas || datas.length === 0) {
+        throw new NotFound();
     }
 }
