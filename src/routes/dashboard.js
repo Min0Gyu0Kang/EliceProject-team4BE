@@ -20,6 +20,7 @@ Date        Author   Status    Description
 2024.06.14  이유민   Modified  ES6 모듈로 변경
 2024.06.14  이유민   Modified  대시보드 병합
 2024.06.15  박수정   Modified  전체적인 코드 통일 및 유효성 검사 코드 분리
+2024.06.18  박수정   Modified  Promise.all로 코드 변경
 */
 import { Router } from 'express';
 import DashboardService from '../services/dashboard.js';
@@ -118,9 +119,12 @@ const router = Router();
  */
 router.get('/', async (req, res, next) => {
     try {
-        const linebar = await DashboardService.getLinebar(); // Linebar
-        const tinybar = await DashboardService.getTinybar(); // Tinybar
-        const scatter = await DashboardService.getScatter(); // Scatter
+        // 3개의 차트 동시에 조회
+        const [linebar, tinybar, scatter] = await Promise.all([
+            DashboardService.getLinebar(),
+            DashboardService.getTinybar(),
+            DashboardService.getScatter(),
+        ]);
 
         // Service로부터 넘어온 데이터에 대한 유효성 검사
         validateServiceData([linebar, tinybar, scatter]);
