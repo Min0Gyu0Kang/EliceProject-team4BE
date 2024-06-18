@@ -1,5 +1,5 @@
 /**File Name : jwt
-Description : JWT 토큰 인증 미들웨어
+Description : JWT 미들웨어
 Author : 박수정
 
 History
@@ -9,16 +9,16 @@ Date        Author   Status     Description
 2024.06.17  박수정   Modified   JWT 미들웨어 수정
 */
 import jwt from 'jsonwebtoken';
-import { Unauthorized, Forbidden } from '../utils/errors.js';
+import { Unauthorized } from '../utils/errors.js';
 
-const verifyRefreshToken = (req, res, next) => {
+const verifyToken = (req, res, next) => {
     try {
         // 요청 헤더
         const authHeader = req.headers.authorization;
-        
+
         // Token 유효성 검사
-        if (!authHeader || !authHeader.startsWith('Bearer '))) {
-            throw new Unauthorized('토큰이 존재하지 않습니다')
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            throw new Unauthorized('토큰이 존재하지 않습니다');
         }
 
         // 요청 헤더에서 Token 추출
@@ -29,10 +29,9 @@ const verifyRefreshToken = (req, res, next) => {
         // req.userId = decoded.userId;
 
         next();
-
     } catch (e) {
-        next(e)
+        next(e);
     }
 };
 
-export default verifyRefreshToken;
+export default verifyToken;

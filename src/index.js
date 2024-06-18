@@ -11,6 +11,7 @@ import map from './routes/map.js';
 import park from './routes/park.js';
 import parkReview from './routes/parkReview.js';
 import userAuth from './routes/userAuth.js';
+import userManagement from './routes/userManagement.js';
 import community from './routes/community.js';
 
 const app = express();
@@ -18,8 +19,8 @@ const app = express();
 app.use(
     cors({
         origin: 'http://localhost:3000',
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        credentials: true,
+        methods: '*',
+        credentials: false,
     }),
 );
 
@@ -36,6 +37,7 @@ app.use('/map', map);
 app.use('/park', park);
 app.use('/park-review', parkReview);
 app.use('/users', userAuth);
+app.use('/users', userManagement);
 app.use('/community', community);
 
 // 에러 처리
