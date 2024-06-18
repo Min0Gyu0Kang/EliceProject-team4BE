@@ -26,6 +26,7 @@ app.use(
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use('/gallery', express.static('uploads/gallery'));
 
 app.get('/', (req, res, next) => {
     res.send('Hello World');
