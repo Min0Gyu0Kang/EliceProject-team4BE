@@ -12,6 +12,7 @@ Date        Author   Status    Description
 2024.06.15  이유민   Modified  유효성 검사 추가
 2024.06.16  이유민   Modified  id, user_id varchar로 변경
 2024.06.17  이유민   Modified  user -> users
+2024.06.18  이유민   Modified  유효성 검사 추가
 */
 import { ParkModel } from '../models/park.js';
 import { ParkReviewModel } from '../models/parkReview.js';
@@ -23,10 +24,16 @@ const nanoid = customAlphabet('0123456789ABCDEFG', 8);
 class ParkReviewService {
     // 리뷰 생성
     static async addReview(park_id, users_id, content, grade) {
+        // 유효성 검사
         if (!content || !grade) {
             throw new BadRequest();
         }
-
+        if (content.length > 400) {
+            throw new BadRequest();
+        }
+        if (content.includes("'")) {
+            content = content.replaceAll("'", "''");
+        }
         if (grade < 0 || grade > 5) {
             throw new BadRequest();
         }
@@ -41,10 +48,16 @@ class ParkReviewService {
 
     // 리뷰 수정
     static async updateReview(id, content, grade) {
+        // 유효성 검사
         if (!content || !grade) {
             throw new BadRequest();
         }
-
+        if (content.length > 400) {
+            throw new BadRequest();
+        }
+        if (content.includes("'")) {
+            content = content.replaceAll("'", "''");
+        }
         if (grade < 0 || grade > 5) {
             throw new BadRequest();
         }
