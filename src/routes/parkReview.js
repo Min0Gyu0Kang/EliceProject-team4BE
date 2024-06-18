@@ -53,7 +53,7 @@ const router = Router();
  *       required: true
  *       description: 리뷰 별점
  *    responses:
- *     200:
+ *     201:
  *      description: 리뷰 작성 성공
  *      schema:
  *       properties:
