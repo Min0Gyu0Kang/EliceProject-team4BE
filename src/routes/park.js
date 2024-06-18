@@ -162,6 +162,14 @@ router.get('/recommend/city/:city', async (req, res, next) => {
  *           address:
  *            type: string
  *            description: 공원 주소
+ *           latitude:
+ *            type: number
+ *            format: float
+ *            description: 위도
+ *           longitude:
+ *            type: number
+ *            format: float
+ *            description: 경도
  *           average_review:
  *            type: number
  *            format: float
@@ -222,6 +230,14 @@ router.get('/recommend', async (req, res, next) => {
  *           address:
  *            type: string
  *            description: 공원 주소
+ *           latitude:
+ *            type: number
+ *            format: float
+ *            description: 위도
+ *           longitude:
+ *            type: number
+ *            format: float
+ *            description: 경도
  *           average_review:
  *            type: number
  *            format: float
