@@ -50,6 +50,7 @@ class ParkModel {
     static async readParkByName(name) {
         const query = `
                 SELECT park.id, park.name, region.address
+                , region.latitude, region.longitude
                 , COALESCE(ROUND(AVG(review.grade), 1)::numeric, 0.0) AS average_review  
                 FROM public."park" AS park  
                 JOIN public."park_region" AS region  
@@ -57,7 +58,7 @@ class ParkModel {
                 LEFT JOIN public."park_review" AS review  
                 ON park.id = review.park_id  
                 WHERE name LIKE '%${name}%' AND park.deleted_at IS NULL
-                GROUP BY park.id, region.address  
+                GROUP BY park.id, region.address, region.latitude, region.longitude   
                 ORDER BY average_review DESC, park.id ASC;
                 `;
         const data = await db.query(query);
@@ -115,6 +116,7 @@ class ParkModel {
 
         const query = `
                 SELECT park.id, park.name, region.address
+                , region.latitude, region.longitude
                 , COALESCE(ROUND(AVG(review.grade), 1)::numeric, 0.0) AS average_review  
                 FROM public."park" AS park  
                 JOIN public."park_region" AS region  
@@ -125,10 +127,9 @@ class ParkModel {
                 ON park.id = review.park_id  
                 ${facilityJoinQuery}
                 ${whereQuery}  
-                GROUP BY park.id, region.address
+                GROUP BY park.id, region.address, region.latitude, region.longitude
                 ${havingQuery}
-                ORDER BY average_review DESC, park.id ASC
-                LIMIT 10;
+                ORDER BY average_review DESC, park.id ASC;
         `;
 
         const data = await db.query(query);
