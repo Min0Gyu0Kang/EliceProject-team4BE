@@ -19,6 +19,7 @@ app.get('/', (req, res, next) => {
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use('/gallery', express.static('uploads/gallery'));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/dashboard', dashboard);
