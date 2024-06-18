@@ -13,9 +13,12 @@ Date        Author   Status    Description
 2024.06.16  이유민   Modified  API 문서 수정
 2024.06.17  이유민   Modified  user -> users
 2024.06.18  이유민   Modified  API 문서 수정
+2024.06.18  이유민   Modified  status code 추가
+2024.06.18  이유민   Modified  유효성 검사 추가
 */
 import { Router } from 'express';
 import ParkReviewService from '../services/parkReview.js';
+import { BadRequest } from '../utils/errors.js';
 
 const router = Router();
 
@@ -50,7 +53,7 @@ const router = Router();
  *       required: true
  *       description: 리뷰 별점
  *    responses:
- *     200:
+ *     201:
  *      description: 리뷰 작성 성공
  *      schema:
  *       properties:
@@ -87,8 +90,22 @@ router.post('/:park_id', async (req, res, next) => {
     const { content, grade } = req.body;
     const users_id = '123asdf'; // 회원가입, 로그인 구현 안 된 상태라 임의로 넣음
     try {
+        // 유효성 검사
+        if (!content || !grade) {
+            throw new BadRequest();
+        }
+        if (content.length > 400) {
+            throw new BadRequest();
+        }
+        if (content.includes("'")) {
+            content = content.replaceAll("'", "''");
+        }
+        if (grade < 0 || grade > 5) {
+            throw new BadRequest();
+        }
+
         await ParkReviewService.addReview(park_id, users_id, content, grade);
-        res.json({ message: '리뷰가 성공적으로 작성되었습니다.' });
+        res.status(201).json({ message: '리뷰가 성공적으로 작성되었습니다.' });
     } catch (e) {
         next(e);
     }
@@ -148,6 +165,20 @@ router.put('/:id', async (req, res, next) => {
     const { id } = req.params;
     const { content, grade } = req.body;
     try {
+        // 유효성 검사
+        if (!content || !grade) {
+            throw new BadRequest();
+        }
+        if (content.length > 400) {
+            throw new BadRequest();
+        }
+        if (content.includes("'")) {
+            content = content.replaceAll("'", "''");
+        }
+        if (grade < 0 || grade > 5) {
+            throw new BadRequest();
+        }
+
         await ParkReviewService.updateReview(id, content, grade);
         res.json({ message: '리뷰가 성공적으로 변경되었습니다.' });
     } catch (e) {
