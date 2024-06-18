@@ -15,7 +15,8 @@ Date        Author   Status    Description
 2024.06.17  이유민   Modified  별점 실수형으로 변환
 2024.06.17  이유민   Modified  user -> users
 2024.06.18  이유민   Modified  페이지네이션 제거
-2024.06.17  이유민   Modified  이름 검색 수정
+2024.06.18  이유민   Modified  이름 검색 수정
+2024.06.18  이유민   Modified  시/도 이름순 정렬
 */
 import { ParkModel } from '../models/park.js';
 import { BadRequest, NotFound } from '../utils/errors.js';
@@ -29,7 +30,14 @@ class ParkService {
             return new NotFound();
         }
 
-        return rows;
+        const resData = rows
+            .filter(data => data.city != null)
+            .sort((a, b) => {
+                if (a.city < b.city) return -1;
+                if (a.city > b.city) return 1;
+                return 0;
+            });
+        return resData;
     }
 
     // 행정구역에 따른 시군구 조회

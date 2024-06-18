@@ -56,7 +56,6 @@ const router = Router();
 router.get('/recommend/city', async (req, res, next) => {
     try {
         const result = await ParkService.getCity();
-
         res.json(result);
     } catch (e) {
         next(e);
@@ -108,7 +107,6 @@ router.get('/recommend/city/:city', async (req, res, next) => {
     const { city } = req.params;
     try {
         const result = await ParkService.getDistrict(city);
-
         res.json(result);
     } catch (e) {
         next(e);
@@ -164,6 +162,14 @@ router.get('/recommend/city/:city', async (req, res, next) => {
  *           address:
  *            type: string
  *            description: 공원 주소
+ *           latitude:
+ *            type: number
+ *            format: float
+ *            description: 위도
+ *           longitude:
+ *            type: number
+ *            format: float
+ *            description: 경도
  *           average_review:
  *            type: number
  *            format: float
@@ -224,6 +230,14 @@ router.get('/recommend', async (req, res, next) => {
  *           address:
  *            type: string
  *            description: 공원 주소
+ *           latitude:
+ *            type: number
+ *            format: float
+ *            description: 위도
+ *           longitude:
+ *            type: number
+ *            format: float
+ *            description: 경도
  *           average_review:
  *            type: number
  *            format: float
