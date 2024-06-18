@@ -11,6 +11,7 @@ Date        Author   Status    Description
 2024.06.15  이유민   Modified  readReviewById 수정
 2024.06.16  이유민   Modified  id, user_id varchar로 변경
 2024.06.17  이유민   Modified  user -> users
+2024.06.18  이유민   Modified  deleted_at 검사 추가
 */
 import db from '../models/psql.js';
 
@@ -35,13 +36,16 @@ class ParkReviewModel {
         return await db.query(`
             UPDATE public."park_review" 
             SET content = '${content}', grade = ${grade}, updated_at = NOW() 
-            WHERE id='${id}';
+            WHERE id='${id}' AND deleted_at IS NULL;
             `);
     }
 
     // id 이용해서 리뷰 삭제
     static async deleteReviewById(id) {
-        return await db.query(`UPDATE public."park_review" SET deleted_at = NOW() WHERE id = '${id}';`);
+        return await db.query(`
+            UPDATE public."park_review" SET deleted_at = NOW() 
+            WHERE id = '${id}' AND deleted_at IS NULL;
+            `);
     }
 
     // park id 이용해서 리뷰 조회
