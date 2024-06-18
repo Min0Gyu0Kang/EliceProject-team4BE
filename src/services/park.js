@@ -14,9 +14,11 @@ Date        Author   Status    Description
 2024.06.17  이유민   Modified  별점순 정렬 추가
 2024.06.17  이유민   Modified  별점 실수형으로 변환
 2024.06.17  이유민   Modified  user -> users
+2024.06.18  이유민   Modified  페이지네이션 제거
+2024.06.17  이유민   Modified  이름 검색 수정
 */
 import { ParkModel } from '../models/park.js';
-import { NotFound } from '../utils/errors.js';
+import { BadRequest, NotFound } from '../utils/errors.js';
 
 class ParkService {
     // 행정구역 조회
@@ -72,12 +74,16 @@ class ParkService {
      * 직관적으로 보기 위해 각각 1씩 추가함
      * page(현재 페이지)는 SQL문에서 사용되기 때문에 실제 값을 넘길 때는 -1
      */
-    static async getParkByName(name, perPage, page) {
-        const { maxPage, data } = await ParkModel.readParkByName(name, perPage, page - 1);
+    static async getParkByName(name) {
+        const { rows } = await ParkModel.readParkByName(name);
 
-        data.rows.map(dt => (dt.average_review = parseFloat(dt.average_review)));
+        if (rows.length > 80) {
+            throw new BadRequest();
+        }
 
-        return { maxPage: Math.ceil(maxPage.rows.length / perPage), page, park: data.rows };
+        rows.map(dt => (dt.average_review = parseFloat(dt.average_review)));
+
+        return { data: rows };
     }
 
     // 추천 공원 조회
@@ -89,12 +95,12 @@ class ParkService {
      * 직관적으로 보기 위해 각각 1씩 추가함
      * page(현재 페이지) 실제 값을 넘길 때는 -1
      */
-    static async getRecommendPark(city, district, facilities, perPage, page) {
-        const { maxPage, data } = await ParkModel.readRecommendPark(city, district, facilities, perPage, page - 1);
+    static async getRecommendPark(city, district, facilities) {
+        const { rows } = await ParkModel.readRecommendPark(city, district, facilities);
 
-        data.rows.map(dt => (dt.average_review = parseFloat(dt.average_review)));
+        rows.map(dt => (dt.average_review = parseFloat(dt.average_review)));
 
-        return { maxPage: Math.ceil(maxPage.rows.length / perPage), page, park: data.rows };
+        return { data: rows };
     }
 
     // 공원 보유시설

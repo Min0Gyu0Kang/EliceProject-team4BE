@@ -33,7 +33,9 @@ class ParkReviewModel {
     // id 이용해서 리뷰 수정
     static async updateReviewById(id, content, grade) {
         return await db.query(`
-            UPDATE public."park_review" SET content = '${content}', grade = ${grade}, updated_at = NOW() WHERE id='${id}';
+            UPDATE public."park_review" 
+            SET content = '${content}', grade = ${grade}, updated_at = NOW() 
+            WHERE id='${id}';
             `);
     }
 

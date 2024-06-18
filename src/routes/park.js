@@ -11,6 +11,7 @@ Date        Author   Status    Description
 2024.06.14  이유민   Modified  추천 공원 facilities 추가
 2024.06.17  이유민   Modified  공원 조회 수정
 2024.06.17  이유민   Modified  user -> users
+2024.06.18  이유민   Modified  페이지네이션 제거
 */
 import { Router } from 'express';
 import ParkService from '../services/park.js';
@@ -143,27 +144,12 @@ router.get('/recommend/city/:city', async (req, res, next) => {
  *        type: string
  *       required: false
  *       description: 보유시설
- *     - in: query
- *       name: page
- *       schema:
- *        type: integer
- *        format: int32
- *       required: false
- *       description: 현재 페이지
  *    responses:
  *     200:
  *      description: 정보 조회 성공
  *      schema:
  *       properties:
- *        maxPage:
- *         type: integer
- *         format: int32
- *         description: 전체 페이지 수
- *        page:
- *         type: integer
- *         format: int32
- *         description: 현재 페이지
- *        park:
+ *        data:
  *         type: array
  *         items:
  *          type: object
@@ -194,10 +180,8 @@ router.get('/recommend/city/:city', async (req, res, next) => {
 router.get('/recommend', async (req, res, next) => {
     const { city, district } = req.query;
     const facilities = req.query.facilities ? req.query.facilities.split(',') : [];
-    const page = Number(req.query.page || 1); // 현재 페이지
-    const perPage = 5; // 페이지 당 공원 수
     try {
-        const result = await ParkService.getRecommendPark(city, district, facilities, perPage, page);
+        const result = await ParkService.getRecommendPark(city, district, facilities);
         res.json(result);
     } catch (e) {
         next(e);
@@ -220,27 +204,12 @@ router.get('/recommend', async (req, res, next) => {
  *       schema:
  *        type: string
  *       required: true
- *     - in: query
- *       name: page
- *       schema:
- *        type: integer
- *        format: int32
- *       required: false
- *       description: 현재 페이지
  *    responses:
  *     200:
  *      description: 정보 조회 성공
  *      schema:
  *       properties:
- *        maxPage:
- *         type: integer
- *         format: int32
- *         description: 전체 페이지 수
- *        page:
- *         type: integer
- *         format: int32
- *         description: 현재 페이지
- *        park:
+ *        data:
  *         type: array
  *         items:
  *          type: object
@@ -259,6 +228,14 @@ router.get('/recommend', async (req, res, next) => {
  *            type: number
  *            format: float
  *            description: 평균 별점
+ *     400:
+ *       description: 잘못된 요청
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '잘못된 요청입니다.'
  *     500:
  *       description: 서버 내부 오류
  *       schema:
@@ -270,10 +247,8 @@ router.get('/recommend', async (req, res, next) => {
  */
 router.get('/search/:name', async (req, res, next) => {
     const { name } = req.params;
-    const page = Number(req.query.page || 1); // 현재 페이지
-    const perPage = 5; // 페이지 당 공원 수
     try {
-        const result = await ParkService.getParkByName(name, perPage, page);
+        const result = await ParkService.getParkByName(name);
         res.json(result);
     } catch (e) {
         next(e);

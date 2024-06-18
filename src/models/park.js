@@ -15,6 +15,7 @@ Date        Author   Status    Description
 2024.06.17  이유민   Modified  별점순 정렬 추가
 2024.06.17  이유민   Modified  별점 기본 값 추가
 2024.06.17  이유민   Modified  user -> users
+2024.06.18  이유민   Modified  페이지네이션 제거
 */
 import db from '../models/psql.js';
 
@@ -46,7 +47,7 @@ class ParkModel {
     }
 
     // 이름으로 정보 조회 - 공원 검색
-    static async readParkByName(name, perPage, page) {
+    static async readParkByName(name) {
         const query = `
                 SELECT park.id, park.name, region.address
                 , COALESCE(ROUND(AVG(review.grade), 1)::numeric, 0.0) AS average_review  
@@ -57,12 +58,11 @@ class ParkModel {
                 ON park.id = review.park_id  
                 WHERE name LIKE '%${name}%' AND park.deleted_at IS NULL
                 GROUP BY park.id, region.address  
-                ORDER BY average_review DESC, park.id ASC
+                ORDER BY average_review DESC, park.id ASC;
                 `;
-        const maxPage = await db.query(`${query};`);
-        const data = await db.query(`${query} LIMIT ${perPage} OFFSET ${5 * page};`);
+        const data = await db.query(query);
 
-        return { maxPage, data };
+        return data;
     }
 
     // 공원 id로 정보 조회
@@ -84,7 +84,7 @@ class ParkModel {
     }
 
     // 위치에 따른 정보 조회 - 추천 공원
-    static async readRecommendPark(city, district, facilities, perPage, page) {
+    static async readRecommendPark(city, district, facilities) {
         // 세종특별자치시는 시군구가 따로 없기 때문에 조건문 이용해서 Query 완성
         let whereQuery = `WHERE legal_region.city = '${city}'`;
         if (district && city != '세종특별자치시') {
@@ -128,12 +128,12 @@ class ParkModel {
                 GROUP BY park.id, region.address
                 ${havingQuery}
                 ORDER BY average_review DESC, park.id ASC
+                LIMIT 10;
         `;
 
-        const maxPage = await db.query(`${query};`);
-        const data = await db.query(`${query} LIMIT ${perPage} OFFSET ${5 * page};`);
+        const data = await db.query(query);
 
-        return { maxPage, data };
+        return data;
     }
 
     // 공원 ID에 따른 보유시설 조회

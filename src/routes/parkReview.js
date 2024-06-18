@@ -12,6 +12,7 @@ Date        Author   Status    Description
 2024.06.16  이유민   Modified  id, user_id varchar로 변경
 2024.06.16  이유민   Modified  API 문서 수정
 2024.06.17  이유민   Modified  user -> users
+2024.06.18  이유민   Modified  API 문서 수정
 */
 import { Router } from 'express';
 import ParkReviewService from '../services/parkReview.js';
@@ -99,7 +100,7 @@ router.post('/:park_id', async (req, res, next) => {
 /**
  * @swagger
  * paths:
- *  /park-review/{park_id}:
+ *  /park-review/{id}:
  *   put:
  *    summary: "공원 리뷰 수정 API"
  *    tags:
@@ -161,7 +162,7 @@ router.put('/:id', async (req, res, next) => {
 /**
  * @swagger
  * paths:
- *  /park-review/{park_id}:
+ *  /park-review/{id}:
  *   delete:
  *    summary: "공원 리뷰 삭제 API"
  *    tags:
