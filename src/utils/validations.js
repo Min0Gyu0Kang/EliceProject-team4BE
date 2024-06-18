@@ -16,14 +16,14 @@ import { BadRequest, NotFound } from './errors.js';
 export function validateQueryAndField(rows, requiredFields) {
     // 쿼리에 대한 유효성 검사
     if (!rows || rows.length === 0) {
-        return new NotFound();
+        throw new NotFound();
     }
 
     // 각 필드에 대한 유효성 검사
     const validatedData = rows.map(data => {
         for (const field of requiredFields) {
             if (!data[field]) {
-                return new BadRequest(`${field} 필드의 데이터가 존재하지 않습니다.`);
+                throw new BadRequest(`${field} 필드의 데이터가 존재하지 않습니다.`);
             }
         }
         return data;
