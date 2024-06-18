@@ -8,6 +8,10 @@ Date        Author   Status    Description
 2024.06.11  이유민   Created
 2024.06.14  이유민   Modified  Park API 분리
 2024.06.14  이유민   Modified  ES6 모듈로 변경
+2024.06.14  이유민   Modified  추천 공원 facilities 추가
+2024.06.17  이유민   Modified  공원 조회 수정
+2024.06.17  이유민   Modified  user -> users
+2024.06.18  이유민   Modified  페이지네이션 제거
 */
 import { Router } from 'express';
 import ParkService from '../services/park.js';
@@ -32,13 +36,22 @@ const router = Router();
  *        city:
  *         type: string
  *         description: 행정구역(시/도)
+ *     404:
+ *       description: 요청한 리소스를 찾을 수 없음
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '요청한 리소스를 찾을 수 없습니다.'
  *     500:
- *      description: 서버 오류
- *      schema:
- *       properties:
- *         message:
- *          type: string
- *          example: 서버 내부에서 에러가 발생했습니다.
+ *       description: 서버 내부 오류
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '서버 내부 에러가 발생했습니다.'
  */
 router.get('/recommend/city', async (req, res, next) => {
     try {
@@ -74,13 +87,22 @@ router.get('/recommend/city', async (req, res, next) => {
  *        district:
  *         type: string
  *         description: 시군구
+ *     404:
+ *       description: 요청한 리소스를 찾을 수 없음
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '요청한 리소스를 찾을 수 없습니다.'
  *     500:
- *      description: 서버 오류
- *      schema:
- *       properties:
- *         message:
- *          type: string
- *          example: 서버 내부에서 에러가 발생했습니다.
+ *       description: 서버 내부 오류
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '서버 내부 에러가 발생했습니다.'
  */
 router.get('/recommend/city/:city', async (req, res, next) => {
     const { city } = req.params;
@@ -116,39 +138,50 @@ router.get('/recommend/city/:city', async (req, res, next) => {
  *        type: string
  *       required: false
  *       description: 행정구역(시군구)
+ *     - in: query
+ *       name: facilities
+ *       schema:
+ *        type: string
+ *       required: false
+ *       description: 보유시설
  *    responses:
  *     200:
  *      description: 정보 조회 성공
  *      schema:
  *       properties:
- *        id:
- *         type: integer
- *         format: int32
- *         description: 공원 ID
- *        name:
- *         type: string
- *         description: 공원명
- *        address:
- *         type: string
- *         description: 공원 주소
- *        average_review:
- *         type: number
- *         format: float
- *         description: 공원 평균 별점
+ *        data:
+ *         type: array
+ *         items:
+ *          type: object
+ *          properties:
+ *           id:
+ *            type: integer
+ *            format: int32
+ *            description: 공원 ID
+ *           name:
+ *            type: string
+ *            description: 공원명
+ *           address:
+ *            type: string
+ *            description: 공원 주소
+ *           average_review:
+ *            type: number
+ *            format: float
+ *            description: 평균 별점
  *     500:
- *      description: 서버 오류
- *      schema:
- *       properties:
- *         message:
- *          type: string
- *          example: 서버 내부에서 에러가 발생했습니다.
+ *       description: 서버 내부 오류
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '서버 내부 에러가 발생했습니다.'
  */
 router.get('/recommend', async (req, res, next) => {
     const { city, district } = req.query;
-    const page = Number(req.query.page || 0); // 현재 페이지
-    const perPage = 5; // 페이지 당 공원 수
+    const facilities = req.query.facilities ? req.query.facilities.split(',') : [];
     try {
-        const result = await ParkService.getRecommendPark(city, district, perPage, page);
+        const result = await ParkService.getRecommendPark(city, district, facilities);
         res.json(result);
     } catch (e) {
         next(e);
@@ -176,34 +209,46 @@ router.get('/recommend', async (req, res, next) => {
  *      description: 정보 조회 성공
  *      schema:
  *       properties:
- *        id:
- *         type: integer
- *         format: int32
- *         description: 공원 ID
- *        name:
- *         type: string
- *         description: 공원명
- *        address:
- *         type: string
- *         description: 공원 주소
- *        average_review:
- *         type: number
- *         format: float
- *         description: 공원 평균 별점
+ *        data:
+ *         type: array
+ *         items:
+ *          type: object
+ *          properties:
+ *           id:
+ *            type: integer
+ *            format: int32
+ *            description: 공원 ID
+ *           name:
+ *            type: string
+ *            description: 공원명
+ *           address:
+ *            type: string
+ *            description: 공원 주소
+ *           average_review:
+ *            type: number
+ *            format: float
+ *            description: 평균 별점
+ *     400:
+ *       description: 잘못된 요청
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '잘못된 요청입니다.'
  *     500:
- *      description: 서버 오류
- *      schema:
- *       properties:
- *         message:
- *          type: string
- *          example: 서버 내부에서 에러가 발생했습니다.
+ *       description: 서버 내부 오류
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '서버 내부 에러가 발생했습니다.'
  */
 router.get('/search/:name', async (req, res, next) => {
     const { name } = req.params;
-    const page = Number(req.query.page || 0); // 현재 페이지
-    const perPage = 5; // 페이지 당 공원 수
     try {
-        const result = await ParkService.getParkByName(name, perPage, page);
+        const result = await ParkService.getParkByName(name);
         res.json(result);
     } catch (e) {
         next(e);
@@ -265,23 +310,28 @@ router.get('/search/:name', async (req, res, next) => {
  *         items:
  *          type: object
  *          properties:
- *           id:
- *            type: integer
- *            format: int32
- *            description: 공원 ID
  *           category:
  *            type: string
  *            description: 보유시설 카테고리
  *           name:
  *            type: string
  *            description: 보유시설명
+ *     404:
+ *       description: 요청한 리소스를 찾을 수 없음
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '요청한 리소스를 찾을 수 없습니다.'
  *     500:
- *      description: 서버 오류
- *      schema:
- *       properties:
- *         message:
- *          type: string
- *          example: 서버 내부에서 에러가 발생했습니다.
+ *       description: 서버 내부 오류
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '서버 내부 에러가 발생했습니다.'
  */
 router.get('/information/:id', async (req, res, next) => {
     const { id } = req.params;
