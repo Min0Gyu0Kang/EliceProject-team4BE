@@ -86,10 +86,8 @@ router.post('/:park_id', async (req, res, next) => {
     const { park_id } = req.params;
     const { content, grade } = req.body;
     const users_id = '123asdf'; // 회원가입, 로그인 구현 안 된 상태라 임의로 넣음
-
     try {
         await ParkReviewService.addReview(park_id, users_id, content, grade);
-
         res.json({ message: '리뷰가 성공적으로 작성되었습니다.' });
     } catch (e) {
         next(e);
@@ -151,7 +149,6 @@ router.put('/:id', async (req, res, next) => {
     const { content, grade } = req.body;
     try {
         await ParkReviewService.updateReview(id, content, grade);
-
         res.json({ message: '리뷰가 성공적으로 변경되었습니다.' });
     } catch (e) {
         next(e);
@@ -204,7 +201,6 @@ router.delete('/:id', async (req, res, next) => {
     const { id } = req.params;
     try {
         await ParkReviewService.deleteReview(id);
-
         res.json({ message: '리뷰가 성공적으로 삭제되었습니다.' });
     } catch (e) {
         next(e);
