@@ -8,9 +8,13 @@ Date        Author   Status    Description
 2024.06.16  이유민   Created
 2024.06.16  이유민   Modified  생성, 조회 추가
 2024.06.17  이유민   Modified  user -> users
+2024.06.18  이유민   Modified  status code 추가
+2024.06.18  이유민   Modified  유효성 검사 추가
+2024.06.18  이유민   Modified  이미지 업로드 수정
 */
 import { Router } from 'express';
 import CommunityService from '../services/community.js';
+import uploadSingleFile from '../utils/upload.js';
 
 const router = Router();
 
@@ -44,7 +48,7 @@ const router = Router();
  *       required: true
  *       description: 게시글 내용
  *    responses:
- *     200:
+ *     201:
  *      description: 게시글 작성 성공
  *      schema:
  *       properties:
@@ -82,6 +86,10 @@ router.post('/board', async (req, res, next) => {
     const park_id = 1;
     const users_id = '123asdf'; // 임시(로그인 완성되면 변경 예정)
     try {
+        if (!park_id || !users_id || !title || !content) {
+            throw new BadRequest();
+        }
+
         const { rows } = await db.query(`
             SELECT id FROM public."park" WHERE name LIKE '%${park_name}%';
             `);
@@ -89,7 +97,7 @@ router.post('/board', async (req, res, next) => {
 
         const result = await CommunityService.addPost(park_id, users_id, title, content);
 
-        res.json({ message: '게시글이 성공적으로 작성되었습니다.' });
+        res.status(201).json({ message: '게시글이 성공적으로 작성되었습니다.' });
     } catch (e) {
         next(e);
     }
@@ -168,6 +176,10 @@ router.put('/board/:id', async (req, res, next) => {
     const { park_name, title, content } = req.body;
     const park_id = 1; //임시
     try {
+        if (!id || !park_id || !title || !content) {
+            throw new BadRequest();
+        }
+
         await CommunityService.updatePost(id, park_id, title, content);
         res.json({ message: '게시글이 성공적으로 변경되었습니다.' });
     } catch (e) {
@@ -364,7 +376,7 @@ router.get('/board/:id', async (req, res, next) => {
  *       required: true
  *       description: 태그
  *    responses:
- *     200:
+ *     201:
  *      description: 갤러리 작성 성공
  *      schema:
  *       properties:
@@ -396,31 +408,17 @@ router.get('/board/:id', async (req, res, next) => {
  *              type: string
  *              example: '서버 내부 에러가 발생했습니다.'
  */
-import multer from 'multer';
-import path from 'path';
-import { customAlphabet } from 'nanoid';
-
-const boardImageName = customAlphabet('0123456789ABCDEFGHIJK', 20);
-
-// 이미지 업로드
-const storage = multer.diskStorage({
-    destination(req, file, cb) {
-        cb(null, 'uploads/gallery'); // 파일을 업로드할 경로 설정
-    },
-    filename(req, file, cb) {
-        const ext = path.extname(file.originalname); // 파일 "확장자"를 추출
-        cb(null, boardImageName() + ext); // nanoid로 파일명 생성 + 기존 확장자 유지
-    },
-});
-
-const upload = multer({ storage });
-router.post('/gallery', upload.single('file'), async (req, res, next) => {
+router.post('/gallery', uploadSingleFile(), async (req, res, next) => {
     const { tags, park_name } = req.body;
     const users_id = '123asdf'; // 임시
     const park_id = 1; // 임시
     try {
+        if (!park_id || !users_id || !req.file.filename) {
+            throw new BadRequest();
+        }
+
         await CommunityService.addGallery(park_id, users_id, req.file.filename, tags);
-        res.json({ message: '갤러리가 성공적으로 작성되었습니다.' });
+        res.status(201).json({ message: '갤러리가 성공적으로 작성되었습니다.' });
     } catch (e) {
         next(e);
     }
@@ -494,12 +492,16 @@ router.post('/gallery', upload.single('file'), async (req, res, next) => {
  *              type: string
  *              example: '서버 내부 에러가 발생했습니다.'
  */
-router.put('/gallery/:id', upload.single('file'), async (req, res, next) => {
+router.put('/gallery/:id', uploadSingleFile(), async (req, res, next) => {
     const { id } = req.params;
     const { park_name, tags } = req.body;
     const park_id = 1; // 임시
     const users_id = '123asdf'; // 임시
     try {
+        if (!park_id || !users_id || !req.file.filename) {
+            throw new BadRequest();
+        }
+
         await CommunityService.updateGallery(id, park_id, users_id, req.file.filename, tags);
         // await CommunityService.updateGallery(id, park_id, req.file.filename, tags);
         res.json({ message: '갤러리가 성공적으로 변경되었습니다.' });
