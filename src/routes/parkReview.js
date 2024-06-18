@@ -8,6 +8,11 @@ Date        Author   Status    Description
 2024.06.14  이유민   Created
 2024.06.14  이유민   Modified  Park API 분리
 2024.06.14  이유민   Modified  ES6 모듈로 변경
+2024.06.15  이유민   Modified  리뷰 조회 추가
+2024.06.16  이유민   Modified  id, user_id varchar로 변경
+2024.06.16  이유민   Modified  API 문서 수정
+2024.06.17  이유민   Modified  user -> users
+2024.06.18  이유민   Modified  API 문서 수정
 */
 import { Router } from 'express';
 import ParkReviewService from '../services/parkReview.js';
@@ -31,16 +36,19 @@ const router = Router();
  *        type: integer
  *       required: true
  *       description: 공원 ID
- *    requestBody:
- *     required: true
- *     schema:
- *      properties:
- *       content:
+ *     - in: body
+ *       name: content
+ *       schema:
  *        type: string
- *        description: 리뷰 내용
- *       grade:
- *        type: number
- *        description: 리뷰 별점
+ *       required: true
+ *       description: 리뷰 내용
+ *     - in: body
+ *       name: grade
+ *       schema:
+ *        type: integer
+ *        format: int32
+ *       required: true
+ *       description: 리뷰 별점
  *    responses:
  *     200:
  *      description: 리뷰 작성 성공
@@ -77,10 +85,10 @@ const router = Router();
 router.post('/:park_id', async (req, res, next) => {
     const { park_id } = req.params;
     const { content, grade } = req.body;
-    const user_id = 1; // 회원가입, 로그인 구현 안 된 상태라 임의로 넣음
+    const users_id = '123asdf'; // 회원가입, 로그인 구현 안 된 상태라 임의로 넣음
 
     try {
-        await ParkReviewService.addReview(park_id, user_id, content, grade);
+        await ParkReviewService.addReview(park_id, users_id, content, grade);
 
         res.json({ message: '리뷰가 성공적으로 작성되었습니다.' });
     } catch (e) {
@@ -92,7 +100,7 @@ router.post('/:park_id', async (req, res, next) => {
 /**
  * @swagger
  * paths:
- *  /park-review/{park_id}:
+ *  /park-review/{id}:
  *   put:
  *    summary: "공원 리뷰 수정 API"
  *    tags:
@@ -102,7 +110,7 @@ router.post('/:park_id', async (req, res, next) => {
  *     - in: path
  *       name: id
  *       schema:
- *        type: integer
+ *        type: string
  *       required: true
  *       description: 해당 리뷰 ID
  *    responses:
@@ -154,7 +162,7 @@ router.put('/:id', async (req, res, next) => {
 /**
  * @swagger
  * paths:
- *  /park-review/{park_id}:
+ *  /park-review/{id}:
  *   delete:
  *    summary: "공원 리뷰 삭제 API"
  *    tags:
@@ -164,7 +172,7 @@ router.put('/:id', async (req, res, next) => {
  *     - in: path
  *       name: id
  *       schema:
- *        type: integer
+ *        type: string
  *       required: true
  *       description: 해당 리뷰 ID
  *    responses:
@@ -203,6 +211,62 @@ router.delete('/:id', async (req, res, next) => {
     }
 });
 
+// 리뷰 조회
+/**
+ * @swagger
+ * paths:
+ *  /park-review/{id}:
+ *   get:
+ *    summary: "공원 리뷰 조회 API"
+ *    tags:
+ *    - park-review
+ *    description: "공원 리뷰 정보 GET"
+ *    parameters:
+ *     - in: path
+ *       name: id
+ *       schema:
+ *        type: string
+ *       required: true
+ *       description: 리뷰 ID
+ *    responses:
+ *     200:
+ *      description: 정보 조회 성공
+ *      schema:
+ *       properties:
+ *        content:
+ *         type: string
+ *         description: 리뷰 내용
+ *        grade:
+ *         type: integer
+ *         format: int32
+ *         description: 별점
+ *     404:
+ *       description: 요청한 리소스를 찾을 수 없음
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '요청한 리소스를 찾을 수 없습니다.'
+ *     500:
+ *       description: 서버 내부 오류
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '서버 내부 에러가 발생했습니다.'
+ */
+router.get('/:id', async (req, res, next) => {
+    const { id } = req.params;
+    try {
+        const result = await ParkReviewService.getReviewById(id);
+        res.json(result);
+    } catch (e) {
+        next(e);
+    }
+});
+
 // 해당 공원의 리뷰 상세보기
 /**
  * @swagger
@@ -213,6 +277,13 @@ router.delete('/:id', async (req, res, next) => {
  *    tags:
  *    - park-review
  *    description: "공원 리뷰 상세 정보 GET"
+ *    parameters:
+ *     - in: path
+ *       name: park_id
+ *       schema:
+ *        type: integer
+ *       required: true
+ *       description: 공원 ID
  *    responses:
  *     200:
  *      description: 정보 조회 성공
@@ -231,7 +302,8 @@ router.delete('/:id', async (req, res, next) => {
  *            type: string
  *            description: 공원명
  *           average_review:
- *            type: string
+ *            type: number
+ *            format: float
  *            description: 평균 별점
  *        review:
  *         type: array

@@ -9,6 +9,7 @@ import dashboard from './routes/dashboard.js';
 import map from './routes/map.js';
 import park from './routes/park.js';
 import parkReview from './routes/parkReview.js';
+import community from './routes/community.js';
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use('/dashboard', dashboard);
 app.use('/map', map);
 app.use('/park', park);
 app.use('/park-review', parkReview);
+app.use('/community', community);
 
 // 에러 처리
 app.use((error, req, res, next) => {
