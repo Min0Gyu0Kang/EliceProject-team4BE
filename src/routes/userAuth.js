@@ -20,7 +20,7 @@ const router = Router();
 /**
  * @swagger
  * paths:
- *  /signup:
+ *  /users/signup:
  *   post:
  *    summary: '회원가입 API'
  *    tags:
@@ -37,6 +37,7 @@ const router = Router();
  *        - nickname
  *        - email
  *        - password
+ *        - confirmPassword
  *       properties:
  *        name:
  *         type: string
@@ -50,6 +51,9 @@ const router = Router();
  *        password:
  *         type: string
  *         description: 비밀번호
+ *        confirmPassword:
+ *         type: string
+ *         description: 비밀번호 확인
  *    responses:
  *     201:
  *      description: 회원가입 성공
@@ -93,11 +97,10 @@ router.post('/signup', async (req, res, next) => {
             throw new BadRequest('입력하지 않은 데이터가 있습니다.');
         }
 
-        const newUser = await UserAuthService.signUp(name, nickname, email, password, confirmPassword);
+        await UserAuthService.signUp(name, nickname, email, password, confirmPassword);
 
         res.json({
             message: '회원가입이 성공적으로 완료되었습니다.',
-            newUser,
         });
     } catch (e) {
         next(e);
@@ -108,7 +111,7 @@ router.post('/signup', async (req, res, next) => {
 /**
  * @swagger
  * paths:
- *  /login:
+ *  /users/login:
  *   post:
  *    summary: '로그인 API'
  *    tags:
@@ -136,10 +139,15 @@ router.post('/signup', async (req, res, next) => {
  *      schema:
  *       type: object
  *       properties:
- *        token:
+ *        message:
  *         type: string
  *         example: "로그인이 성공적으로 수행되었습니다."
- *         description: JWT 토큰?
+ *        accessToken:
+ *         type: string
+ *         description: JWT 액세스 토큰
+ *        refreshToken:
+ *         type: string
+ *         description: JWT 리프레시 토큰
  *     400:
  *      description: 잘못된 요청 - 필수 필드 누락, 유효성 검사 실패 등
  *      schema:
@@ -212,7 +220,7 @@ router.post('/reissue-token', async (req, res, next) => {
 /**
  * @swagger
  * paths:
- *  /logout:
+ *  /users/logout:
  *   post:
  *    summary: '로그아웃 API'
  *    tags:

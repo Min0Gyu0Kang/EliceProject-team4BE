@@ -1,4 +1,4 @@
-/**File Name : jwt
+/**File Name : auth
 Description : JWT 미들웨어
 Author : 박수정
 
@@ -11,7 +11,7 @@ Date        Author   Status     Description
 import jwt from 'jsonwebtoken';
 import { Unauthorized } from '../utils/errors.js';
 
-const verifyToken = (req, res, next) => {
+const verifyAuthToken = (req, res, next) => {
     try {
         // 요청 헤더
         const authHeader = req.headers.authorization;
@@ -25,8 +25,7 @@ const verifyToken = (req, res, next) => {
         const token = authHeader.split(' ')[1];
 
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        req.user = decoded;
-        // req.userId = decoded.userId;
+        req.userId = decoded.id;
 
         next();
     } catch (e) {
@@ -34,4 +33,4 @@ const verifyToken = (req, res, next) => {
     }
 };
 
-export default verifyToken;
+export default verifyAuthToken;
