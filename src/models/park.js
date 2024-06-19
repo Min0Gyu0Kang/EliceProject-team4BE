@@ -16,6 +16,7 @@ Date        Author   Status    Description
 2024.06.17  이유민   Modified  별점 기본 값 추가
 2024.06.17  이유민   Modified  user -> users
 2024.06.18  이유민   Modified  페이지네이션 제거
+2024.06.19  이유민   Modified  평균 별점, 별점수 수정
 */
 import db from '../models/psql.js';
 
@@ -51,7 +52,7 @@ class ParkModel {
         const query = `
                 SELECT park.id, park.name, region.address
                 , region.latitude, region.longitude
-                , COALESCE(ROUND(AVG(review.grade), 1)::numeric, 0.0) AS average_review  
+                , COALESCE(ROUND(AVG(CASE WHEN review.deleted_at IS NULL THEN review.grade ELSE NULL END), 1), 0) AS average_review
                 FROM public."park" AS park  
                 JOIN public."park_region" AS region  
                 ON park.park_region_id = region.id  
@@ -70,8 +71,8 @@ class ParkModel {
     static async readParkById(id) {
         return await db.query(`
                 SELECT park.id, park.name, park.type, region.address, government.phone_number
-                , COALESCE(ROUND(AVG(review.grade), 1)::numeric, 0.0) AS average_review
-                , COUNT(review.grade) AS count_review  
+                , COALESCE(ROUND(AVG(CASE WHEN review.deleted_at IS NULL THEN review.grade ELSE NULL END), 1), 0) AS average_review
+                , COALESCE(COUNT(CASE WHEN review.deleted_at IS NULL THEN review.grade ELSE NULL END), 0) AS count_review
                 FROM public."park" AS park  
                 JOIN public."park_region" AS region  
                 ON park.park_region_id = region.id  
@@ -117,7 +118,7 @@ class ParkModel {
         const query = `
                 SELECT park.id, park.name, region.address
                 , region.latitude, region.longitude
-                , COALESCE(ROUND(AVG(review.grade), 1)::numeric, 0.0) AS average_review  
+                , COALESCE(ROUND(AVG(CASE WHEN review.deleted_at IS NULL THEN review.grade ELSE NULL END), 1), 0) AS average_review
                 FROM public."park" AS park  
                 JOIN public."park_region" AS region  
                 ON park.park_region_id = region.id  

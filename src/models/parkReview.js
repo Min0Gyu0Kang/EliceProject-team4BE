@@ -12,6 +12,7 @@ Date        Author   Status    Description
 2024.06.16  이유민   Modified  id, user_id varchar로 변경
 2024.06.17  이유민   Modified  user -> users
 2024.06.18  이유민   Modified  deleted_at 검사 추가
+2024.06.19  이유민   Modified  평균 별점, 별점수 수정
 */
 import db from '../models/psql.js';
 
@@ -51,7 +52,8 @@ class ParkReviewModel {
     // park id 이용해서 리뷰 조회
     static async readReviewByParkId(park_id) {
         return await db.query(`
-                SELECT park.id, park.name, ROUND(AVG(review.grade), 1) AS average_review
+                SELECT park.id, park.name
+                , COALESCE(ROUND(AVG(CASE WHEN review.deleted_at IS NULL THEN review.grade ELSE NULL END), 1), 0) AS average_review
                 FROM public."park" AS park  
                 LEFT JOIN public."park_review" AS review  
                 ON park.id = review.park_id  
