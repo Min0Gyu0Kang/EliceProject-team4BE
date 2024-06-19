@@ -17,7 +17,7 @@ const boardImageName = customAlphabet('0123456789ABCDEFG', 20);
 
 const storage = multer.diskStorage({
     destination(req, file, cb) {
-        cb(null, 'uploads/gallery'); // 파일을 업로드할 경로 설정
+        cb(null, 'src/uploads/gallery'); // 파일을 업로드할 경로 설정
     },
     filename(req, file, cb) {
         const ext = path.extname(file.originalname); // 파일 "확장자"를 추출
