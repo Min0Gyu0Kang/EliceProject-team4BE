@@ -15,10 +15,12 @@ Date        Author   Status    Description
 2024.06.18  이유민   Modified  API 문서 수정
 2024.06.18  이유민   Modified  status code 추가
 2024.06.18  이유민   Modified  유효성 검사 추가
+2024.06.19  이유민   Modified  토큰 확인 추가
 */
 import { Router } from 'express';
 import ParkReviewService from '../services/parkReview.js';
 import { BadRequest } from '../utils/errors.js';
+import verifyAuthToken from '../utils/auth.js';
 
 const router = Router();
 
@@ -39,6 +41,12 @@ const router = Router();
  *        type: integer
  *       required: true
  *       description: 공원 ID
+ *     - in: header
+ *       name: Authorization
+ *       schema:
+ *        type: string
+ *       required: true
+ *       description: 인증 토큰
  *     - in: body
  *       name: content
  *       schema:
@@ -68,6 +76,14 @@ const router = Router();
  *           error:
  *              type: string
  *              example: '잘못된 요청입니다.'
+ *     401:
+ *      description: 인증 실패
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '인증에 실패했습니다.'
  *     404:
  *       description: 요청한 리소스를 찾을 수 없음
  *       schema:
@@ -85,10 +101,10 @@ const router = Router();
  *              type: string
  *              example: '서버 내부 에러가 발생했습니다.'
  */
-router.post('/:park_id', async (req, res, next) => {
+router.post('/:park_id', verifyAuthToken, async (req, res, next) => {
     const { park_id } = req.params;
     const { content, grade } = req.body;
-    const users_id = '123asdf'; // 회원가입, 로그인 구현 안 된 상태라 임의로 넣음
+    const users_id = req.userId; // 회원가입, 로그인 구현 안 된 상태라 임의로 넣음
     try {
         // 유효성 검사
         if (!content || !grade) {
@@ -128,6 +144,25 @@ router.post('/:park_id', async (req, res, next) => {
  *        type: string
  *       required: true
  *       description: 해당 리뷰 ID
+ *     - in: header
+ *       name: Authorization
+ *       schema:
+ *        type: string
+ *       required: true
+ *       description: 인증 토큰
+ *     - in: body
+ *       name: content
+ *       schema:
+ *        type: string
+ *       required: true
+ *       description: 리뷰 내용
+ *     - in: body
+ *       name: grade
+ *       schema:
+ *        type: integer
+ *        format: int32
+ *       required: true
+ *       description: 리뷰 별점
  *    responses:
  *     200:
  *      description: 리뷰 수정 성공
@@ -144,6 +179,22 @@ router.post('/:park_id', async (req, res, next) => {
  *           error:
  *              type: string
  *              example: 잘못된 요청입니다.
+ *     401:
+ *      description: 인증 실패
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '인증에 실패했습니다.'
+ *     403:
+ *      description: 권한 없음
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '권한이 없습니다.'
  *     404:
  *       description: 요청한 리소스를 찾을 수 없음
  *       schema:
@@ -161,9 +212,10 @@ router.post('/:park_id', async (req, res, next) => {
  *              type: string
  *              example: '서버 내부 에러가 발생했습니다.'
  */
-router.put('/:id', async (req, res, next) => {
+router.put('/:id', verifyAuthToken, async (req, res, next) => {
     const { id } = req.params;
     const { content, grade } = req.body;
+    const users_id = req.userId;
     try {
         // 유효성 검사
         if (!content || !grade) {
@@ -179,7 +231,7 @@ router.put('/:id', async (req, res, next) => {
             throw new BadRequest();
         }
 
-        await ParkReviewService.updateReview(id, content, grade);
+        await ParkReviewService.updateReview(id, users_id, content, grade);
         res.json({ message: '리뷰가 성공적으로 변경되었습니다.' });
     } catch (e) {
         next(e);
@@ -203,6 +255,12 @@ router.put('/:id', async (req, res, next) => {
  *        type: string
  *       required: true
  *       description: 해당 리뷰 ID
+ *     - in: header
+ *       name: Authorization
+ *       schema:
+ *        type: string
+ *       required: true
+ *       description: 인증 토큰
  *    responses:
  *     200:
  *      description: 리뷰 삭제 성공
@@ -211,6 +269,22 @@ router.put('/:id', async (req, res, next) => {
  *        message:
  *         type: string
  *         example: 리뷰가 성공적으로 삭제되었습니다.
+ *     401:
+ *      description: 인증 실패
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '인증에 실패했습니다.'
+ *     403:
+ *      description: 권한 없음
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '권한이 없습니다.'
  *     404:
  *       description: 요청한 리소스를 찾을 수 없음
  *       schema:
@@ -228,10 +302,11 @@ router.put('/:id', async (req, res, next) => {
  *              type: string
  *              example: '서버 내부 에러가 발생했습니다.'
  */
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', verifyAuthToken, async (req, res, next) => {
     const { id } = req.params;
+    const users_id = req.userId;
     try {
-        await ParkReviewService.deleteReview(id);
+        await ParkReviewService.deleteReview(id, users_id);
         res.json({ message: '리뷰가 성공적으로 삭제되었습니다.' });
     } catch (e) {
         next(e);
@@ -267,6 +342,9 @@ router.delete('/:id', async (req, res, next) => {
  *         type: integer
  *         format: int32
  *         description: 별점
+ *        nickname:
+ *         type: string
+ *         description: 리뷰 작성자 닉네임
  *     404:
  *       description: 요청한 리소스를 찾을 수 없음
  *       schema:
@@ -347,6 +425,9 @@ router.get('/:id', async (req, res, next) => {
  *           content:
  *            type: string
  *            description: 공원 후기 내용
+ *           review_id:
+ *            type: string
+ *            description: 리뷰 고유 ID
  *     404:
  *       description: 요청한 리소스를 찾을 수 없음
  *       schema:

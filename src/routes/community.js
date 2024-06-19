@@ -11,30 +11,105 @@ Date        Author   Status    Description
 2024.06.18  이유민   Modified  status code 추가
 2024.06.18  이유민   Modified  유효성 검사 추가
 2024.06.18  이유민   Modified  이미지 업로드 수정
+2024.06.19  이유민   Modified  토큰 확인 추가
 */
 import { Router } from 'express';
 import CommunityService from '../services/community.js';
+import ParkService from '../services/park.js';
 import uploadSingleFile from '../utils/upload.js';
+import verifyAuthToken from '../utils/auth.js';
 
 const router = Router();
+
+// 이름으로 공원 검색
+// 갤러리 전체 조회
+/**
+ * @swagger
+ * paths:
+ *  /community/search/parkname:
+ *   get:
+ *    summary: "커뮤니티 공원 검색 API"
+ *    tags:
+ *    - community
+ *    description: "커뮤니티 게시글 생성, 갤러리 생성에서 사용될 공원ID GET"
+ *    parameters:
+ *     - in: query
+ *       name: name
+ *       schema:
+ *        type: string
+ *       required: true
+ *       description: 공원 이름
+ *     - in: header
+ *       name: Authorization
+ *       schema:
+ *        type: string
+ *       required: true
+ *       description: 인증 토큰
+ *    responses:
+ *     200:
+ *      description: 정보 조회 성공
+ *      schema:
+ *       properties:
+ *        id:
+ *         type: integer
+ *         format: int32
+ *         description: 공원 번호
+ *        name:
+ *         type: string
+ *         description: 공원 이름
+ *        address:
+ *         type: string
+ *         description: 공원 주소
+ *     401:
+ *      description: 인증 실패
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '인증에 실패했습니다.'
+ *     500:
+ *       description: 서버 내부 오류
+ *       schema:
+ *         type: object
+ *         properties:
+ *           error:
+ *              type: string
+ *              example: '서버 내부 에러가 발생했습니다.'
+ */
+router.get('/search/parkname', verifyAuthToken, async (req, res, next) => {
+    const { name } = req.query;
+    try {
+        const result = await ParkService.getParkNameByName(name);
+        res.json(result);
+    } catch (e) {
+        next(e);
+    }
+});
 
 // 게시글 생성
 /**
  * @swagger
  * paths:
- *  /community/board:
+ *  /community/board/{park_id}:
  *   post:
  *    summary: "커뮤니티 게시글 작성 API"
  *    tags:
  *    - community-board
  *    description: "커뮤니티 게시글 POST"
  *    parameters:
- *     - in: body
- *       name: park_name
+ *     - in: path
+ *       name: park_id
+ *       schema:
+ *        type: integer
+ *       required: true
+ *       description: 공원 ID
+ *     - in: header
+ *       name: Authorization
  *       schema:
  *        type: string
  *       required: true
- *       description: 공원명
+ *       description: 인증 토큰
  *     - in: body
  *       name: title
  *       schema:
@@ -63,6 +138,14 @@ const router = Router();
  *           error:
  *              type: string
  *              example: '잘못된 요청입니다.'
+ *     401:
+ *      description: 인증 실패
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '인증에 실패했습니다.'
  *     404:
  *       description: 요청한 리소스를 찾을 수 없음
  *       schema:
@@ -80,22 +163,16 @@ const router = Router();
  *              type: string
  *              example: '서버 내부 에러가 발생했습니다.'
  */
-import db from '../models/psql.js';
-router.post('/board', async (req, res, next) => {
-    const { park_name, title, content } = req.body;
-    const park_id = 1;
-    const users_id = '123asdf'; // 임시(로그인 완성되면 변경 예정)
+router.post('/board/:park_id', verifyAuthToken, async (req, res, next) => {
+    const { title, content } = req.body;
+    const { park_id } = req.params;
+    const users_id = req.userId;
     try {
         if (!park_id || !users_id || !title || !content) {
             throw new BadRequest();
         }
 
-        const { rows } = await db.query(`
-            SELECT id FROM public."park" WHERE name LIKE '%${park_name}%';
-            `);
-        console.log(rows[0].id);
-
-        const result = await CommunityService.addPost(park_id, users_id, title, content);
+        await CommunityService.addPost(park_id, users_id, title, content);
 
         res.status(201).json({ message: '게시글이 성공적으로 작성되었습니다.' });
     } catch (e) {
@@ -120,12 +197,12 @@ router.post('/board', async (req, res, next) => {
  *        type: string
  *       required: true
  *       description: 해당 게시글 ID
- *     - in: body
- *       name: park_name
+ *     - in: header
+ *       name: Authorization
  *       schema:
  *        type: string
  *       required: true
- *       description: 공원명
+ *       description: 인증 토큰
  *     - in: body
  *       name: title
  *       schema:
@@ -154,6 +231,22 @@ router.post('/board', async (req, res, next) => {
  *           error:
  *              type: string
  *              example: 잘못된 요청입니다.
+ *     401:
+ *      description: 인증 실패
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '인증에 실패했습니다.'
+ *     403:
+ *      description: 권한 없음
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '권한이 없습니다.'
  *     404:
  *       description: 요청한 리소스를 찾을 수 없음
  *       schema:
@@ -171,16 +264,16 @@ router.post('/board', async (req, res, next) => {
  *              type: string
  *              example: '서버 내부 에러가 발생했습니다.'
  */
-router.put('/board/:id', async (req, res, next) => {
+router.put('/board/:id', verifyAuthToken, async (req, res, next) => {
     const { id } = req.params;
-    const { park_name, title, content } = req.body;
-    const park_id = 1; //임시
+    const { title, content } = req.body;
+    const users_id = req.userId;
     try {
-        if (!id || !park_id || !title || !content) {
+        if (!id || !users_id || !title || !content) {
             throw new BadRequest();
         }
 
-        await CommunityService.updatePost(id, park_id, title, content);
+        await CommunityService.updatePost(id, users_id, title, content);
         res.json({ message: '게시글이 성공적으로 변경되었습니다.' });
     } catch (e) {
         next(e);
@@ -204,6 +297,12 @@ router.put('/board/:id', async (req, res, next) => {
  *        type: string
  *       required: true
  *       description: 해당 게시글 ID
+ *     - in: header
+ *       name: Authorization
+ *       schema:
+ *        type: string
+ *       required: true
+ *       description: 인증 토큰
  *    responses:
  *     200:
  *      description: 게시글 삭제 성공
@@ -212,6 +311,22 @@ router.put('/board/:id', async (req, res, next) => {
  *        message:
  *         type: string
  *         example: 게시글이 성공적으로 삭제되었습니다.
+ *     401:
+ *      description: 인증 실패
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '인증에 실패했습니다.'
+ *     403:
+ *      description: 권한 없음
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '권한이 없습니다.'
  *     404:
  *       description: 요청한 리소스를 찾을 수 없음
  *       schema:
@@ -229,10 +344,11 @@ router.put('/board/:id', async (req, res, next) => {
  *              type: string
  *              example: '서버 내부 에러가 발생했습니다.'
  */
-router.delete('/board/:id', async (req, res, next) => {
+router.delete('/board/:id', verifyAuthToken, async (req, res, next) => {
     const { id } = req.params;
+    const users_id = req.userId;
     try {
-        await CommunityService.deletePost(id);
+        await CommunityService.deletePost(id, users_id);
         res.json({ message: '게시글이 성공적으로 삭제되었습니다.' });
     } catch (e) {
         next(e);
@@ -319,6 +435,9 @@ router.get('/board', async (req, res, next) => {
  *        nickname:
  *         type: string
  *         description: 게시글 작성자 닉네임
+ *        users_id:
+ *         type: string
+ *         description: 게시글 작성자 ID
  *     404:
  *       description: 요청한 리소스를 찾을 수 없음
  *       schema:
@@ -350,13 +469,25 @@ router.get('/board/:id', async (req, res, next) => {
 /**
  * @swagger
  * paths:
- *  /community/gallery:
+ *  /community/gallery/{park_id}:
  *   post:
  *    summary: "커뮤니티 갤러리 작성 API"
  *    tags:
  *    - community-gallery
  *    description: "커뮤니티 갤러리 POST"
  *    parameters:
+ *     - in: path
+ *       name: park_id
+ *       schema:
+ *        type: integer
+ *       required: true
+ *       description: 공원 ID
+ *     - in: header
+ *       name: Authorization
+ *       schema:
+ *        type: string
+ *       required: true
+ *       description: 인증 토큰
  *     - in: body
  *       name: file
  *       schema:
@@ -364,16 +495,9 @@ router.get('/board/:id', async (req, res, next) => {
  *       required: true
  *       description: 이미지 파일
  *     - in: body
- *       name: park_name
- *       schema:
- *        type: string
- *       required: true
- *       description: 공원명
- *     - in: body
  *       name: tags
  *       schema:
  *        type: string
- *       required: true
  *       description: 태그
  *    responses:
  *     201:
@@ -391,6 +515,14 @@ router.get('/board/:id', async (req, res, next) => {
  *           error:
  *              type: string
  *              example: '잘못된 요청입니다.'
+ *     401:
+ *      description: 인증 실패
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '인증에 실패했습니다.'
  *     404:
  *       description: 요청한 리소스를 찾을 수 없음
  *       schema:
@@ -408,10 +540,10 @@ router.get('/board/:id', async (req, res, next) => {
  *              type: string
  *              example: '서버 내부 에러가 발생했습니다.'
  */
-router.post('/gallery', uploadSingleFile(), async (req, res, next) => {
-    const { tags, park_name } = req.body;
-    const users_id = '123asdf'; // 임시
-    const park_id = 1; // 임시
+router.post('/gallery/:park_id', verifyAuthToken, uploadSingleFile(), async (req, res, next) => {
+    const { tags } = req.body;
+    const users_id = req.userId;
+    const { park_id } = req.params;
     try {
         if (!park_id || !users_id || !req.file.filename) {
             throw new BadRequest();
@@ -441,24 +573,23 @@ router.post('/gallery', uploadSingleFile(), async (req, res, next) => {
  *        type: string
  *       required: true
  *       description: 해당 갤러리 ID
- *     - in: body
- *       name: park_name
+ *     - in: header
+ *       name: Authorization
  *       schema:
  *        type: string
  *       required: true
- *       description: 공원명
+ *       description: 인증 토큰
  *     - in: body
- *       name: title
+ *       name: file
  *       schema:
  *        type: string
  *       required: true
- *       description: 게시글 제목
+ *       description: 이미지 파일
  *     - in: body
- *       name: content
+ *       name: tags
  *       schema:
  *        type: string
- *       required: true
- *       description: 게시글 내용
+ *       description: 태그
  *    responses:
  *     200:
  *      description: 게시글 수정 성공
@@ -475,6 +606,22 @@ router.post('/gallery', uploadSingleFile(), async (req, res, next) => {
  *           error:
  *              type: string
  *              example: 잘못된 요청입니다.
+ *     401:
+ *      description: 인증 실패
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '인증에 실패했습니다.'
+ *     403:
+ *      description: 권한 없음
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '권한이 없습니다.'
  *     404:
  *       description: 요청한 리소스를 찾을 수 없음
  *       schema:
@@ -492,18 +639,16 @@ router.post('/gallery', uploadSingleFile(), async (req, res, next) => {
  *              type: string
  *              example: '서버 내부 에러가 발생했습니다.'
  */
-router.put('/gallery/:id', uploadSingleFile(), async (req, res, next) => {
+router.put('/gallery/:id', verifyAuthToken, uploadSingleFile(), async (req, res, next) => {
     const { id } = req.params;
-    const { park_name, tags } = req.body;
-    const park_id = 1; // 임시
-    const users_id = '123asdf'; // 임시
+    const { tags } = req.body;
+    const users_id = req.userId;
     try {
-        if (!park_id || !users_id || !req.file.filename) {
+        if (!users_id || !req.file.filename) {
             throw new BadRequest();
         }
 
-        await CommunityService.updateGallery(id, park_id, users_id, req.file.filename, tags);
-        // await CommunityService.updateGallery(id, park_id, req.file.filename, tags);
+        await CommunityService.updateGallery(id, users_id, req.file.filename, tags);
         res.json({ message: '갤러리가 성공적으로 변경되었습니다.' });
     } catch (e) {
         next(e);
@@ -527,6 +672,12 @@ router.put('/gallery/:id', uploadSingleFile(), async (req, res, next) => {
  *        type: string
  *       required: true
  *       description: 해당 갤러리 ID
+ *     - in: header
+ *       name: Authorization
+ *       schema:
+ *        type: string
+ *       required: true
+ *       description: 인증 토큰
  *    responses:
  *     200:
  *      description: 갤러리 삭제 성공
@@ -535,6 +686,22 @@ router.put('/gallery/:id', uploadSingleFile(), async (req, res, next) => {
  *        message:
  *         type: string
  *         example: 갤러리가 성공적으로 삭제되었습니다.
+ *     401:
+ *      description: 인증 실패
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '인증에 실패했습니다.'
+ *     403:
+ *      description: 권한 없음
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '권한이 없습니다.'
  *     404:
  *       description: 요청한 리소스를 찾을 수 없음
  *       schema:
@@ -552,9 +719,9 @@ router.put('/gallery/:id', uploadSingleFile(), async (req, res, next) => {
  *              type: string
  *              example: '서버 내부 에러가 발생했습니다.'
  */
-router.delete('/gallery/:id', async (req, res, next) => {
+router.delete('/gallery/:id', verifyAuthToken, async (req, res, next) => {
     const { id } = req.params;
-    const users_id = '123asdf'; // 임시
+    const users_id = req.userId;
     try {
         await CommunityService.deleteGallery(id, users_id);
         res.json({ message: '갤러리가 성공적으로 삭제되었습니다.' });
