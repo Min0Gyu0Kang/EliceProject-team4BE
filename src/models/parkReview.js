@@ -53,9 +53,9 @@ class ParkReviewModel {
         return await db.query(`
                 SELECT park.id, park.name, ROUND(AVG(review.grade), 1) AS average_review
                 FROM public."park" AS park  
-                JOIN public."park_review" AS review  
+                LEFT JOIN public."park_review" AS review  
                 ON park.id = review.park_id  
-                WHERE park.id = ${park_id} AND review.deleted_at IS NULL
+                WHERE park.id = ${park_id}
                 GROUP BY park.id;
                 `);
     }
