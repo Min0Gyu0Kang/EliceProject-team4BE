@@ -13,6 +13,7 @@ Date        Author   Status    Description
 2024.06.17  이유민   Modified  user -> users
 2024.06.18  이유민   Modified  deleted_at 검사 추가
 2024.06.19  이유민   Modified  평균 별점, 별점수 수정
+2024.06.19  이유민   Modified  접근 권한 추가
 */
 import db from '../models/psql.js';
 
@@ -28,24 +29,39 @@ class ParkReviewModel {
     // id 이용해서 리뷰 조회
     static async readReviewById(id) {
         return await db.query(`
-            SELECT content, grade FROM public."park_review" WHERE id = '${id}' AND deleted_at IS NULL;
+            SELECT review.content, review.grade, users.nickname
+            FROM public."park_review" AS review
+            LEFT JOIN public."users" AS users
+            ON review.users_id = users.id
+            WHERE review.id = '${id}' AND review.deleted_at IS NULL;
             `);
     }
 
+    // 접근 권한 확인
+    static async checkReviewById(id, users_id) {
+        const data = await db.query(`
+            SELECT id 
+            FROM public."park_review" 
+            WHERE id = '${id}' AND users_id = '${users_id}' AND deleted_at IS NULL;
+            `);
+
+        return data.rows;
+    }
+
     // id 이용해서 리뷰 수정
-    static async updateReviewById(id, content, grade) {
+    static async updateReviewById(id, users_id, content, grade) {
         return await db.query(`
             UPDATE public."park_review" 
             SET content = '${content}', grade = ${grade}, updated_at = NOW() 
-            WHERE id='${id}' AND deleted_at IS NULL;
+            WHERE id='${id}' AND users_id = '${users_id}' AND deleted_at IS NULL;
             `);
     }
 
     // id 이용해서 리뷰 삭제
-    static async deleteReviewById(id) {
+    static async deleteReviewById(id, users_id) {
         return await db.query(`
             UPDATE public."park_review" SET deleted_at = NOW() 
-            WHERE id = '${id}' AND deleted_at IS NULL;
+            WHERE id = '${id}' AND users_id = '${users_id}' AND deleted_at IS NULL;
             `);
     }
 
@@ -65,7 +81,7 @@ class ParkReviewModel {
     // park id 이용해서 리뷰 상세 조회
     static async readReviewDetailByParkId(park_id) {
         return await db.query(`
-                SELECT users.nickname, review.grade, review.content
+                SELECT users.nickname, review.grade, review.content, review.id AS review_id
                 FROM public."park_review" AS review  
                 JOIN public."users" AS users  
                 ON review.users_id = users.id  

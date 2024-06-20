@@ -150,6 +150,17 @@ class ParkModel {
                 WHERE facilities.park_id = ${park_id} AND facilities.deleted_at IS NULL;
                 `);
     }
+
+    // 공원 이름 검색 - community에서 사용
+    static async readParkNameByName(name) {
+        return await db.query(`
+            SELECT park.id, park.name, region.address 
+            FROM public."park" AS park
+            LEFT JOIN public."park_region" AS region
+            ON park.park_region_id = region.id
+            WHERE park.name LIKE '%${name}%';
+            `);
+    }
 }
 
 export { ParkModel };

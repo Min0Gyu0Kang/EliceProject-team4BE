@@ -9,9 +9,11 @@ Date        Author   Status    Description
 2024.06.16  이유민   Modified  생성, 조회 추가
 2024.06.17  이유민   Modified  user -> users
 2024.06.18  이유민   Modified  유효성 검사 수정
+2024.06.19  이유민   Modified  접근 권한 추가
 */
 import { CommunityModel } from '../models/community.js';
-import { NotFound } from '../utils/errors.js';
+import { ParkModel } from '../models/park.js';
+import { Forbidden, NotFound } from '../utils/errors.js';
 import { customAlphabet } from 'nanoid';
 
 const nanoid = customAlphabet('0123456789ABCDEFG', 8);
@@ -19,29 +21,40 @@ const nanoid = customAlphabet('0123456789ABCDEFG', 8);
 class CommunityService {
     // 게시글 생성
     static async addPost(park_id, users_id, title, content) {
+        const data = await ParkModel.checkParkById(park_id);
+        if (data.rows.length === 0) {
+            throw new NotFound();
+        }
+
         const { rows } = await CommunityModel.createBoard(nanoid(), park_id, users_id, title, content);
         return rows;
     }
 
     // 게시글 수정
-    static async updatePost(id, park_id, title, content) {
+    static async updatePost(id, users_id, title, content) {
         const check = await CommunityModel.readBoardById(id);
         if (check.rows.length === 0) {
             throw new NotFound();
         }
+        if (check.rows[0].id !== users_id) {
+            throw new Forbidden();
+        }
 
-        const { rows } = await CommunityModel.updateBoard(id, park_id, title, content);
+        const { rows } = await CommunityModel.updateBoard(id, users_id, title, content);
         return rows;
     }
 
     // 게시글 삭제
-    static async deletePost(id) {
+    static async deletePost(id, users_id) {
         const check = await CommunityModel.readBoardById(id);
         if (check.rows.length === 0) {
             throw new NotFound();
         }
+        if (check.rows[0].id !== users_id) {
+            throw new Forbidden();
+        }
 
-        const { rows } = await CommunityModel.deleteBoard(id);
+        const { rows } = await CommunityModel.deleteBoard(id, users_id);
         return rows;
     }
 
@@ -69,13 +82,16 @@ class CommunityService {
     }
 
     // 갤러리 수정
-    static async updateGallery(id, park_id, users_id, image, tags) {
+    static async updateGallery(id, users_id, image, tags) {
         const check = await CommunityModel.checkGalleryById(id);
         if (check.rows.length === 0) {
             throw new NotFound();
         }
+        if (check.rows[0].users_id !== users_id) {
+            throw new Forbidden();
+        }
 
-        const { rows } = await CommunityModel.updateGalleryById(id, park_id, users_id, image, tags);
+        const { rows } = await CommunityModel.updateGalleryById(id, users_id, image, tags);
         return rows;
     }
 
@@ -84,6 +100,9 @@ class CommunityService {
         const check = await CommunityModel.checkGalleryById(id);
         if (check.rows.length === 0) {
             throw new NotFound();
+        }
+        if (check.rows[0].users_id !== users_id) {
+            throw new Forbidden();
         }
 
         const { rows } = await CommunityModel.deleteGallery(id, users_id);

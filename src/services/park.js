@@ -121,6 +121,12 @@ class ParkService {
         const { rows } = await ParkModel.readFacilitiesByParkId(park_id);
         return rows;
     }
+
+    // 공원 이름 검색 - community에서 사용
+    static async getParkNameByName(name) {
+        const { rows } = await ParkModel.readParkNameByName(name);
+        return rows;
+    }
 }
 
 export default ParkService;

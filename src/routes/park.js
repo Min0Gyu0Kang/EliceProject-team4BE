@@ -12,6 +12,7 @@ Date        Author   Status    Description
 2024.06.17  이유민   Modified  공원 조회 수정
 2024.06.17  이유민   Modified  user -> users
 2024.06.18  이유민   Modified  페이지네이션 제거
+2024.06.20  이유민   Modified  API 문서 수정
 */
 import { Router } from 'express';
 import ParkService from '../services/park.js';
@@ -26,7 +27,7 @@ const router = Router();
  *   get:
  *    summary: "시/도 조회 API"
  *    tags:
- *    - park
+ *    - Park
  *    description: "추천 공원 설정 시 사용될 행정구역(시/도) 정보 GET"
  *    responses:
  *     200:
@@ -70,7 +71,7 @@ router.get('/recommend/city', async (req, res, next) => {
  *   get:
  *    summary: "시/도별 시군구 조회 API"
  *    tags:
- *    - park
+ *    - Park
  *    description: "추천 공원 설정 시 사용될 시군구 정보 GET"
  *    parameters:
  *     - in: path
@@ -121,7 +122,7 @@ router.get('/recommend/city/:city', async (req, res, next) => {
  *   get:
  *    summary: "추천 공원 조회 API"
  *    tags:
- *    - park
+ *    - Park
  *    description: "추천 공원 정보 GET"
  *    parameters:
  *     - in: query
@@ -202,7 +203,7 @@ router.get('/recommend', async (req, res, next) => {
  *   get:
  *    summary: "공원 직접 검색 API"
  *    tags:
- *    - park
+ *    - Park
  *    description: "검색한 공원 정보 GET"
  *    parameters:
  *     - in: path
@@ -277,7 +278,7 @@ router.get('/search/:name', async (req, res, next) => {
  *   get:
  *    summary: "한 공원의 정보 조회 API"
  *    tags:
- *    - park
+ *    - Park
  *    description: "선택한 공원 정보 GET"
  *    parameters:
  *     - in: path
