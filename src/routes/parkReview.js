@@ -21,7 +21,7 @@ Date        Author   Status    Description
 import { Router } from 'express';
 import ParkReviewService from '../services/parkReview.js';
 import { BadRequest } from '../utils/errors.js';
-import verifyAuthToken from '../utils/auth.js';
+import verifyAuthToken from '../utils/authToken.js';
 
 const router = Router();
 
