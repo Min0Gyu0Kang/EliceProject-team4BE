@@ -12,6 +12,7 @@ Date        Author   Status    Description
 2024.06.18  이유민   Modified  유효성 검사 추가
 2024.06.18  이유민   Modified  이미지 업로드 수정
 2024.06.19  이유민   Modified  토큰 확인 추가
+2024.06.20  이유민   Modified  API 문서 수정
 */
 import { Router } from 'express';
 import CommunityService from '../services/community.js';
@@ -30,7 +31,7 @@ const router = Router();
  *   get:
  *    summary: "커뮤니티 공원 검색 API"
  *    tags:
- *    - community
+ *    - Community
  *    description: "커뮤니티 게시글 생성, 갤러리 생성에서 사용될 공원ID GET"
  *    parameters:
  *     - in: query
@@ -95,7 +96,7 @@ router.get('/search/parkname', verifyAuthToken, async (req, res, next) => {
  *   post:
  *    summary: "커뮤니티 게시글 작성 API"
  *    tags:
- *    - community-board
+ *    - Community-board
  *    description: "커뮤니티 게시글 POST"
  *    parameters:
  *     - in: path
@@ -188,7 +189,7 @@ router.post('/board/:park_id', verifyAuthToken, async (req, res, next) => {
  *   put:
  *    summary: "커뮤니티 게시글 수정 API"
  *    tags:
- *    - community-board
+ *    - Community-board
  *    description: "커뮤니티 게시글 PUT"
  *    parameters:
  *     - in: path
@@ -288,7 +289,7 @@ router.put('/board/:id', verifyAuthToken, async (req, res, next) => {
  *   delete:
  *    summary: "커뮤니티 게시글 삭제 API"
  *    tags:
- *    - community-board
+ *    - Community-board
  *    description: "커뮤니티 게시글 DELETE"
  *    parameters:
  *     - in: path
@@ -363,7 +364,7 @@ router.delete('/board/:id', verifyAuthToken, async (req, res, next) => {
  *   get:
  *    summary: "커뮤니티 게시글 전체 조회 API"
  *    tags:
- *    - community-board
+ *    - Community-board
  *    description: "커뮤니티 게시글 전체 정보 GET"
  *    responses:
  *     200:
@@ -412,7 +413,7 @@ router.get('/board', async (req, res, next) => {
  *   get:
  *    summary: "커뮤니티 게시글 조회 API"
  *    tags:
- *    - community-board
+ *    - Community-board
  *    description: "커뮤니티 게시글 정보 GET"
  *    parameters:
  *     - in: path
@@ -473,7 +474,7 @@ router.get('/board/:id', async (req, res, next) => {
  *   post:
  *    summary: "커뮤니티 갤러리 작성 API"
  *    tags:
- *    - community-gallery
+ *    - Community-gallery
  *    description: "커뮤니티 갤러리 POST"
  *    parameters:
  *     - in: path
@@ -564,7 +565,7 @@ router.post('/gallery/:park_id', verifyAuthToken, uploadSingleFile(), async (req
  *   put:
  *    summary: "커뮤니티 갤러리 수정 API"
  *    tags:
- *    - community-gallery
+ *    - Community-gallery
  *    description: "커뮤니티 갤러리 PUT"
  *    parameters:
  *     - in: path
@@ -663,7 +664,7 @@ router.put('/gallery/:id', verifyAuthToken, uploadSingleFile(), async (req, res,
  *   delete:
  *    summary: "커뮤니티 갤러리 삭제 API"
  *    tags:
- *    - community-gallery
+ *    - Community-gallery
  *    description: "커뮤니티 갤러리 DELETE"
  *    parameters:
  *     - in: path
@@ -738,7 +739,7 @@ router.delete('/gallery/:id', verifyAuthToken, async (req, res, next) => {
  *   get:
  *    summary: "커뮤니티 갤러리 전체 조회 API"
  *    tags:
- *    - community-gallery
+ *    - Community-gallery
  *    description: "커뮤니티 갤러리 전체 정보 GET"
  *    responses:
  *     200:
@@ -784,7 +785,7 @@ router.get('/gallery', async (req, res, next) => {
  *   get:
  *    summary: "커뮤니티 갤러리 조회 API"
  *    tags:
- *    - community-gallery
+ *    - Community-gallery
  *    description: "커뮤니티 갤러리 정보 GET"
  *    parameters:
  *     - in: path
@@ -842,7 +843,7 @@ router.get('/gallery/:id', async (req, res, next) => {
  *   get:
  *    summary: "커뮤니티 민원 넣기 API"
  *    tags:
- *    - community-complaint
+ *    - Community-complaint
  *    description: "공원 담당 기관 정보 GET"
  *    parameters:
  *     - in: path

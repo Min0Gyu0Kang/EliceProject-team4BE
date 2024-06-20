@@ -16,6 +16,7 @@ Date        Author   Status    Description
 2024.06.18  이유민   Modified  status code 추가
 2024.06.18  이유민   Modified  유효성 검사 추가
 2024.06.19  이유민   Modified  토큰 확인 추가
+2024.06.20  이유민   Modified  API 문서 수정
 */
 import { Router } from 'express';
 import ParkReviewService from '../services/parkReview.js';
@@ -32,7 +33,7 @@ const router = Router();
  *   post:
  *    summary: "공원 리뷰 작성 API"
  *    tags:
- *    - park-review
+ *    - Park-review
  *    description: "지정된 공원에 대한 리뷰 POST"
  *    parameters:
  *     - in: path
@@ -135,7 +136,7 @@ router.post('/:park_id', verifyAuthToken, async (req, res, next) => {
  *   put:
  *    summary: "공원 리뷰 수정 API"
  *    tags:
- *    - park-review
+ *    - Park-review
  *    description: "리뷰 PUT"
  *    parameters:
  *     - in: path
@@ -246,7 +247,7 @@ router.put('/:id', verifyAuthToken, async (req, res, next) => {
  *   delete:
  *    summary: "공원 리뷰 삭제 API"
  *    tags:
- *    - park-review
+ *    - Park-review
  *    description: "리뷰 DELETE"
  *    parameters:
  *     - in: path
@@ -321,7 +322,7 @@ router.delete('/:id', verifyAuthToken, async (req, res, next) => {
  *   get:
  *    summary: "공원 리뷰 조회 API"
  *    tags:
- *    - park-review
+ *    - Park-review
  *    description: "공원 리뷰 정보 GET"
  *    parameters:
  *     - in: path
@@ -380,7 +381,7 @@ router.get('/:id', async (req, res, next) => {
  *   get:
  *    summary: "공원 리뷰 상세보기 API"
  *    tags:
- *    - park-review
+ *    - Park-review
  *    description: "공원 리뷰 상세 정보 GET"
  *    parameters:
  *     - in: path
