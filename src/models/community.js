@@ -8,6 +8,7 @@ Date        Author   Status    Description
 2024.06.16  이유민   Created
 2024.06.16  이유민   Modified  생성, 조회 추가
 2024.06.17  이유민   Modified  user -> users
+2024.06.19  이유민   Modified  users_id 수정
 */
 import db from '../models/psql.js';
 
@@ -21,20 +22,20 @@ class CommunityModel {
     }
 
     // 게시글 수정
-    static async updateBoard(id, park_id, title, content) {
+    static async updateBoard(id, users_id, title, content) {
         return await db.query(`
             UPDATE public."board_community" 
-            SET park_id = ${park_id}, title = '${title}', content = '${content}', updated_at = NOW()
-            WHERE id = '${id}' AND deleted_at IS NULL;
+            SET title = '${title}', content = '${content}', updated_at = NOW()
+            WHERE id = '${id}' AND users_id = '${users_id}' AND deleted_at IS NULL;
             `);
     }
 
     // 게시글 삭제
-    static async deleteBoard(id) {
+    static async deleteBoard(id, users_id) {
         return await db.query(`
             UPDATE public."board_community" 
             SET deleted_at = NOW()
-            WHERE id = '${id}' AND deleted_at IS NULL;
+            WHERE id = '${id}' AND users_id = '${users_id}' AND deleted_at IS NULL;
             `);
     }
 
@@ -54,13 +55,17 @@ class CommunityModel {
     }
 
     // 게시글 조회
-    static async readBoardById(id) {
+    static async readBoardById(id, users_id) {
+        const whereQuery = `WHERE community.id = '${id}' AND community.deleted_at IS NULL`;
+        if (users_id) {
+            whereQuery += `AND users_id = '${users_id}'`;
+        }
         return await db.query(`
-            SELECT community.title, community.content, users.nickname
+            SELECT community.title, community.content, users.nickname, users.id AS users_id
             FROM public."board_community" AS community
             LEFT JOIN public."users" AS users
             ON community.users_id = users.id
-            WHERE community.id = '${id}' AND community.deleted_at IS NULL;
+            ${whereQuery};
             `);
     }
 
@@ -73,10 +78,10 @@ class CommunityModel {
     }
 
     // 갤러리 수정
-    static async updateGalleryById(id, park_id, users_id, image, tags) {
+    static async updateGalleryById(id, users_id, image, tags) {
         return await db.query(`
             UPDATE public."board_gallery"
-            SET park_id = ${park_id}, image = '${image}', hash_tag = '${tags}', updated_at = NOW()
+            SET image = '${image}', hash_tag = '${tags}', updated_at = NOW()
             WHERE id = '${id}' AND users_id = '${users_id}' AND deleted_at IS NULL;
             `);
     }
@@ -115,7 +120,7 @@ class CommunityModel {
     // 갤러리 체크
     static async checkGalleryById(id) {
         return await db.query(`
-            SELECT id
+            SELECT id, users_id
             FROM public."board_gallery"
             WHERE id = '${id}' AND deleted_at IS NULL;
             `);
