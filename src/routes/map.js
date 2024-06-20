@@ -26,7 +26,7 @@ const router = Router();
  *   get:
  *    summary: '공원 전체에 대한 지도 API'
  *    tags:
- *    - map
+ *    - Map
  *    description: '공원 전체에 대한 지도 API 정보 GET'
  *    responses:
  *     200:
@@ -54,7 +54,7 @@ const router = Router();
  *       properties:
  *        error:
  *         type: string
- *         example: '데이터가 존재하지 않습니다.'
+ *         example: '잘못된 요청입니다.'
  *     404:
  *      description: 요청한 리소스를 찾을 수 없음
  *      schema:
@@ -92,7 +92,7 @@ router.get('/', async (req, res, next) => {
  *   get:
  *    summary: '공원 1개에 대한 지도 API'
  *    tags:
- *    - map
+ *    - Map
  *    description: '공원 1개에 대한 지도 API 정보 GET'
  *    parameters:
  *    - in: path
@@ -127,7 +127,7 @@ router.get('/', async (req, res, next) => {
  *       properties:
  *        error:
  *         type: string
- *         example: '데이터가 존재하지 않습니다.'
+ *         example: '잘못된 요청입니다.'
  *     404:
  *      description: 요청한 리소스를 찾을 수 없음
  *      schema:
