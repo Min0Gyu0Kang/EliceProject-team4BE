@@ -35,7 +35,7 @@ const router = Router();
  *     get:
  *       summary: '대시보드 차트 API 데이터 조회'
  *       tags:
- *         - dashboard
+ *         - Dashboard
  *       description: 'Linebar, Tinybar, Scatter 차트 데이터 조회'
  *       responses:
  *         200:
@@ -99,7 +99,7 @@ const router = Router();
  *             properties:
  *               error:
  *                  type: string
- *                  example: '데이터가 존재하지 않습니다.'
+ *                  example: '잘못된 요청입니다.'
  *         404:
  *           description: 요청한 리소스를 찾을 수 없음
  *           schema:
