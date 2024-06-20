@@ -11,7 +11,7 @@ Date        Author   Status     Description
 */
 
 import { Router } from 'express';
-import verifyAuthToken from '../utils/authToken.js';
+import verifyAuthToken from '../utils/verifyAuthToken.js';
 import UserManagementService from '../services/userManagement.js';
 import { BadRequest } from '../utils/errors.js';
 
