@@ -18,7 +18,7 @@ import { Router } from 'express';
 import CommunityService from '../services/community.js';
 import ParkService from '../services/park.js';
 import uploadSingleFile from '../utils/upload.js';
-import verifyAuthToken from '../utils/authToken.js';
+import verifyAuthToken from '../utils/verifyAuthToken.js';
 
 const router = Router();
 

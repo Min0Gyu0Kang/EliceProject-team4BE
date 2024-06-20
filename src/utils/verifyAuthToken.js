@@ -1,13 +1,13 @@
-/**File Name : auth
-Description : JWT 미들웨어
+/**File Name : verifyAuthToken
+Description : AccessToken 검증 미들웨어
 Author : 박수정
 
 History
 Date        Author   Status     Description
 2024.06.15  박수정   Created
-2024.06.15  박수정   Modified   JWT 미들웨어 추가
-2024.06.17  박수정   Modified   JWT 미들웨어 수정
-2024.06.18  박수정   Modified   JWT 미들웨어 수정
+2024.06.15  박수정   Modified   AccessToken 검증 미들웨어 추가
+2024.06.17  박수정   Modified   AccessToken 검증 미들웨어 수정
+2024.06.18  박수정   Modified   AccessToken 검증 미들웨어 수정
 */
 import jwt from 'jsonwebtoken';
 import { Unauthorized } from './errors.js';

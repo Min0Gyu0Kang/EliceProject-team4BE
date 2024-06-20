@@ -6,9 +6,9 @@ History
 Date        Author   Status     Description
 2024.06.15  박수정   Created
 2024.06.15  박수정   Modified   회원가입 및 로그인 API 추가
-2024.06.16  박수정   Modified   아이디 및 비밀번호 찾기 API 추가
+2024.06.16  박수정   Modified   이메일 및 비밀번호 찾기 API 추가
 2024.06.17  박수정   Modified   회원가입 및 로그인 API 수정
-2024.06.19  박수정   Modified   아이디 및 비밀번호 찾기 API 수정
+2024.06.19  박수정   Modified   이메일 및 비밀번호 찾기 API 수정
 */
 
 import { Router } from 'express';
@@ -223,6 +223,83 @@ router.post('/reissue-token', async (req, res, next) => {
         res.status(200).json({
             message: '새로운 AccessToken이 발급되었습니다.',
             token: newAccessToken,
+        });
+    } catch (e) {
+        next(e);
+    }
+});
+
+// 비밀번호 찾기
+/**
+ * @swagger
+ * paths:
+ *  /users/find-password:
+ *   post:
+ *    summary: '비밀번호 찾기 API'
+ *    tags:
+ *    - User
+ *    description: 등록된 이름 및 이메일을 통해, 임시 비밀번호 발급 및 이메일 전송
+ *    parameters:
+ *    - in: body
+ *      schema:
+ *       type: object
+ *       required:
+ *        - name
+ *        - email
+ *       properties:
+ *        name:
+ *         type: string
+ *         description: 이름
+ *        email:
+ *         type: string
+ *         description: 이메일
+ *    responses:
+ *     200:
+ *      description: 임시 비밀번호 발급 및 이메일 전송 성공
+ *      schema:
+ *       type: object
+ *       properties:
+ *        message:
+ *         type: string
+ *         example: '입력하신 이메일로 임시 비밀번호가 전송되었습니다.'
+ *     400:
+ *      description: 잘못된 요청 - 필수 필드 누락, 유효성 검사 실패 등
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '잘못된 요청입니다.'
+ *     404:
+ *      description: 요청한 리소스를 찾을 수 없음
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *         type: string
+ *         example: '요청한 리소스를 찾을 수 없습니다.'
+ *     500:
+ *      description: 서버 내부 오류
+ *      schema:
+ *       type: object
+ *       properties:
+ *        error:
+ *          type: string
+ *          example: '서버 내부 에러가 발생했습니다.'
+ */
+router.post('/find-password', async (req, res, next) => {
+    try {
+        const { name, email } = req.body;
+
+        // 입력하지 않은 데이터 확인
+        if (!name || !email) {
+            throw new BadRequest('이름 및 이메일을 입력해주세요.');
+        }
+
+        await UserAuthService.findPassword(name, email);
+
+        res.json({
+            message: '입력하신 이메일로 임시 비밀번호가 전송되었습니다.',
         });
     } catch (e) {
         next(e);

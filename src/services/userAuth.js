@@ -6,16 +6,18 @@ History
 Date        Author   Status     Description
 2024.06.15  박수정   Created
 2024.06.15  박수정   Modified   회원가입 및 로그인 API 추가
-2024.06.16  박수정   Modified   아이디 및 비밀번호 찾기 API 추가
+2024.06.16  박수정   Modified   이메일 및 비밀번호 찾기 API 추가
 2024.06.17  박수정   Modified   회원가입 및 로그인 API 수정
-2024.06.19  박수정   Modified   아이디 및 비밀번호 찾기 API 수정
+2024.06.19  박수정   Modified   이메일 및 비밀번호 찾기 API 수정
 */
 
 import UserAuthModel from '../models/userAuth.js';
 import RefreshTokenModel from '../models/refreshToken.js';
 import { BadRequest, Unauthorized, NotFound, Conflict } from '../utils/errors.js';
+import sendTempPasswordByEmail from '../utils/sendTempPasswordByEmail.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { nanoid } from 'nanoid';
 
 class UserAuthService {
     // 회원가입
@@ -90,7 +92,7 @@ class UserAuthService {
             throw new Unauthorized('비밀번호가 틀렸습니다.');
         }
 
-        // Token 여부 확인
+        // Token 존재 여부 확인
         const savedToken = await RefreshTokenModel.findRefreshTokenByUser(user.id);
         if (savedToken) {
             throw new Conflict('이미 로그인한 상태입니다.');
@@ -134,6 +136,43 @@ class UserAuthService {
         await RefreshTokenModel.updateAccessToken(refreshToken);
 
         return { newAccessToken };
+    }
+
+    // 비밀번호 찾기
+    static async findPassword(name, email) {
+        // 데이터 유효성 검사
+        // 이름 형식 검사
+        const nameRegex = /^([가-힣]{2,20}|[a-zA-Z]{2,20})$/; // 2-20자 이내의 한글만 또는 영문자만 허용
+        if (!nameRegex.test(name)) {
+            throw new BadRequest('이름 형식이 올바르지 않습니다.');
+        }
+
+        // 이메일 형식 검사
+        const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/; // 영문자, 숫자, _, -, . 허용
+        if (!emailRegex.test(email)) {
+            throw new BadRequest('이메일 형식이 올바르지 않습니다.');
+        }
+
+        // 입력한 이름 및 이메일과 일치하는 데이터 존재 여부 확인
+        const user = await UserAuthModel.findPassword(name, email);
+        if (user === undefined) {
+            throw new NotFound('일치하는 회원 정보를 찾을 수 없습니다.');
+        }
+
+        // 임시 비밀번호 발급
+        const tempPassword = nanoid(6);
+        await UserAuthModel.issueTempPassword(name, email, tempPassword);
+
+        // 이메일로 전송
+        const mailOptions = {
+            from: process.env.EMAIL_ID,
+            to: email,
+            subject: '도시의 오아시스 - 임시 비밀번호 발급',
+            text: `${name}님의 임시 비밀번호는 ${tempPassword} 입니다.`,
+            html: `${name}님의 임시 비밀번호는 <strong>${tempPassword}</strong> 입니다.`,
+        };
+
+        await sendTempPasswordByEmail(mailOptions);
     }
 }
 
