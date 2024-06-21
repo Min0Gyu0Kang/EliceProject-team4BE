@@ -14,6 +14,7 @@ Date        Author   Status    Description
 2024.06.18  이유민   Modified  deleted_at 검사 추가
 2024.06.19  이유민   Modified  평균 별점, 별점수 수정
 2024.06.19  이유민   Modified  접근 권한 추가
+2024.06.21  이유민   Modified  리뷰 본인 확인 추가
 */
 import db from '../models/psql.js';
 
@@ -79,13 +80,15 @@ class ParkReviewModel {
     }
 
     // park id 이용해서 리뷰 상세 조회
-    static async readReviewDetailByParkId(park_id) {
+    static async readReviewDetailByParkId(park_id, users_id) {
         return await db.query(`
-                SELECT users.nickname, review.grade, review.content, review.id AS review_id
+                SELECT users.nickname, review.grade, review.content, review.id AS review_id,
+                CASE WHEN review.users_id = '${users_id}' THEN 'T' ELSE 'F' END AS verification
                 FROM public."park_review" AS review  
                 JOIN public."users" AS users  
                 ON review.users_id = users.id  
-                WHERE review.park_id = ${park_id} AND review.deleted_at IS NULL;
+                WHERE review.park_id = ${park_id} AND review.deleted_at IS NULL
+                ORDER BY verification DESC;
                 `);
     }
 }

@@ -15,6 +15,7 @@ Date        Author   Status    Description
 2024.06.18  이유민   Modified  유효성 검사 추가
 2024.06.18  이유민   Modified  유효성 검사 수정
 2024.06.19  이유민   Modified  접근 권한 추가
+2024.06.21  이유민   Modified  리뷰 본인 확인 추가
 */
 import { ParkModel } from '../models/park.js';
 import { ParkReviewModel } from '../models/parkReview.js';
@@ -86,14 +87,14 @@ class ParkReviewService {
         return rows;
     }
 
-    // 리뷰 상세보기 - 리뷰 작성자, 별점, 내용
-    static async getReviewDetail(park_id) {
+    // 리뷰 상세보기 - 리뷰 작성자, 별점, 내용, 본인 확인
+    static async getReviewDetail(park_id, users_id) {
         const check = await ParkModel.checkParkById(park_id);
         if (check.rows.length === 0) {
             throw new NotFound();
         }
 
-        const { rows } = await ParkReviewModel.readReviewDetailByParkId(park_id);
+        const { rows } = await ParkReviewModel.readReviewDetailByParkId(park_id, users_id);
         return rows;
     }
 }

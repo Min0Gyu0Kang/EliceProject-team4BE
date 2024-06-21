@@ -17,11 +17,13 @@ Date        Author   Status    Description
 2024.06.18  이유민   Modified  유효성 검사 추가
 2024.06.19  이유민   Modified  토큰 확인 추가
 2024.06.20  이유민   Modified  API 문서 수정
+2024.06.21  이유민   Modified  리뷰 본인 확인 추가
 */
 import { Router } from 'express';
 import ParkReviewService from '../services/parkReview.js';
 import { BadRequest } from '../utils/errors.js';
 import verifyAuthToken from '../utils/verifyAuthToken.js';
+import jwt from 'jsonwebtoken';
 
 const router = Router();
 
@@ -390,6 +392,11 @@ router.get('/:id', async (req, res, next) => {
  *        type: integer
  *       required: true
  *       description: 공원 ID
+ *     - in: header
+ *       name: Authorization
+ *       schema:
+ *        type: string
+ *       description: 인증 토큰
  *    responses:
  *     200:
  *      description: 정보 조회 성공
@@ -429,6 +436,9 @@ router.get('/:id', async (req, res, next) => {
  *           review_id:
  *            type: string
  *            description: 리뷰 고유 ID
+ *           verification:
+ *            type: string
+ *            description: 본인 확인
  *     404:
  *       description: 요청한 리소스를 찾을 수 없음
  *       schema:
@@ -448,9 +458,23 @@ router.get('/:id', async (req, res, next) => {
  */
 router.get('/details/:park_id', async (req, res, next) => {
     const { park_id } = req.params;
+    let users_id = '';
     try {
+        // 요청 헤더
+        const authHeader = req.headers.authorization;
+
+        // Token 유효성 검사
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            users_id = 'NoLoginUser';
+        } else {
+            // 요청 헤더에서 Token 추출
+            const token = authHeader.split(' ')[1];
+            const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+            users_id = decoded.id;
+        }
+
         const park = await ParkReviewService.getReview(park_id);
-        const review = await ParkReviewService.getReviewDetail(park_id);
+        const review = await ParkReviewService.getReviewDetail(park_id, users_id);
         res.json({ park, review });
     } catch (e) {
         next(e);
