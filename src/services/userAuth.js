@@ -6,9 +6,10 @@ History
 Date        Author   Status     Description
 2024.06.15  박수정   Created
 2024.06.15  박수정   Modified   회원가입 및 로그인 API 추가
-2024.06.16  박수정   Modified   이메일 및 비밀번호 찾기 API 추가
+2024.06.16  박수정   Modified   비밀번호 찾기 API 추가
 2024.06.17  박수정   Modified   회원가입 및 로그인 API 수정
-2024.06.19  박수정   Modified   이메일 및 비밀번호 찾기 API 수정
+2024.06.19  박수정   Modified   비밀번호 찾기 API 수정
+2024.06.21  박수정   Modified   비밀번호 찾기 API 수정
 */
 
 import UserAuthModel from '../models/userAuth.js';
@@ -161,7 +162,11 @@ class UserAuthService {
 
         // 임시 비밀번호 발급
         const tempPassword = nanoid(6);
-        await UserAuthModel.issueTempPassword(name, email, tempPassword);
+
+        // 비밀번호 암호화
+        const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+        await UserAuthModel.issueTempPassword(name, email, hashedPassword);
 
         // 이메일로 전송
         const mailOptions = {

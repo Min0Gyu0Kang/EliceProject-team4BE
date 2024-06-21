@@ -8,6 +8,7 @@ Date        Author   Status     Description
 2024.06.15  박수정   Modified   Refresh Token 관련 코드 추가
 2024.06.17  박수정   Modified   Refresh Token 관련 코드 수정
 2024.06.18  박수정   Modified   Refresh Token 관련 코드 수정
+2024.06.21  박수정   Modified   Refresh Token 관련 코드 수정
 */
 
 import db from './psql.js';
@@ -74,8 +75,8 @@ class RefreshTokenModel {
         return result.rows[0];
     }
 
-    // RefreshToken 삭제
-    static async deleteRefreshToken(refreshToken) {
+    // refreshToken으로 RefreshToken 삭제
+    static async deleteRefreshTokenByRefreshToken(refreshToken) {
         // const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
         const query = `
           UPDATE refresh_tokens
@@ -85,6 +86,22 @@ class RefreshTokenModel {
         `;
         // const values = [hashedRefreshToken];
         const values = [refreshToken];
+        const result = await db.query(query, values);
+
+        return result.rows[0];
+    }
+
+    // refreshToken으로 RefreshToken 삭제
+    static async deleteRefreshTokenByUserId(userId) {
+        // const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+        const query = `
+          UPDATE refresh_tokens
+          SET deleted_at = CURRENT_TIMESTAMP
+          WHERE users_id = $1
+          RETURNING *
+        `;
+        // const values = [hashedRefreshToken];
+        const values = [userId];
         const result = await db.query(query, values);
 
         return result.rows[0];

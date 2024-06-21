@@ -8,6 +8,7 @@ Date        Author   Status     Description
 2024.06.17  박수정   Modified   로그아웃 API 추가
 2024.06.17  박수정   Modified   마이페이지, 회원정보 수정, 회원탈퇴 API 추가
 2024.06.18  박수정   Modified   마이페이지, 회원정보 수정, 회원탈퇴 API 수정
+2024.06.21  박수정   Modified   제약 조건 추가
 */
 
 import db from '../models/psql.js';
@@ -19,6 +20,7 @@ class UserManagementModel {
             SELECT name, nickname, email, password
             FROM users
             WHERE id = $1
+                AND deleted_at IS NULL
         `;
         const values = [userId];
         const result = await db.query(query, values);
@@ -32,6 +34,7 @@ class UserManagementModel {
             SELECT nickname
             FROM users
             WHERE nickname = $1
+                AND deleted_at IS NULL
         `;
         const values = [nickname];
         const result = await db.query(query, values);
@@ -47,6 +50,7 @@ class UserManagementModel {
                 password = $3,
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = $1
+                AND deleted_at IS NULL
             RETURNING *
         `;
         const values = [userId, nickname, password];
@@ -62,6 +66,7 @@ class UserManagementModel {
             SET nickname = $2,
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = $1
+                AND deleted_at IS NULL
             RETURNING *
         `;
         const values = [userId, nickname];
