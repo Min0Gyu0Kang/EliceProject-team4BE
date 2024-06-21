@@ -167,11 +167,9 @@ router.put('/update', verifyAuthToken, async (req, res, next) => {
             throw new BadRequest('입력하지 않은 데이터가 있습니다.');
         }
 
-        let newUserInfo;
-
-        if ((newPassword && confirmNewPassword) || newPassword !== '' || confirmNewPassword !== '') {
+        if (newPassword !== undefined || confirmNewPassword !== undefined) {
             // 비밀번호를 변경하는 경우
-            newUserInfo = await UserManagementService.updateUserInfoWithNewPassword(
+            await UserManagementService.updateUserInfoWithNewPassword(
                 userId,
                 nickname,
                 password,
@@ -180,7 +178,7 @@ router.put('/update', verifyAuthToken, async (req, res, next) => {
             );
         } else {
             // 비밀번호를 변경하지 않는 경우
-            newUserInfo = await UserManagementService.updateUserInfoWithoutNewPassword(userId, nickname, password);
+            await UserManagementService.updateUserInfoWithoutNewPassword(userId, nickname, password);
         }
 
         res.status(200).json({

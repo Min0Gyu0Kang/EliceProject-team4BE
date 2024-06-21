@@ -298,7 +298,7 @@ router.post('/find-password', async (req, res, next) => {
 
         await UserAuthService.findPassword(name, email);
 
-        res.json({
+        res.status(200).json({
             message: '입력하신 이메일로 임시 비밀번호가 전송되었습니다.',
         });
     } catch (e) {

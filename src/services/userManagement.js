@@ -8,6 +8,7 @@ Date        Author   Status     Description
 2024.06.17  박수정   Modified   로그아웃 API 추가
 2024.06.17  박수정   Modified   마이페이지, 회원정보 수정, 회원탈퇴 API 추가
 2024.06.18  박수정   Modified   마이페이지, 회원정보 수정, 회원탈퇴 API 수정
+2024.06.21  박수정   Modified   회원탈퇴 API 수정
 */
 
 import UserManagementModel from '../models/userManagement.js';
@@ -125,7 +126,11 @@ class UserManagementService {
             throw new Unauthorized('비밀번호가 틀렸습니다.');
         }
 
+        // 회원 탈퇴일 저장
         await UserManagementModel.withdraw(userId);
+
+        // RefreshToken 삭제일 저장
+        await RefreshTokenModel.deleteRefreshTokenByUserId(userId);
     }
 
     // 로그아웃
@@ -136,7 +141,7 @@ class UserManagementService {
             throw new Unauthorized('유효하지 않은 RefreshToken입니다.');
         }
 
-        await RefreshTokenModel.deleteRefreshToken(refreshToken);
+        await RefreshTokenModel.deleteRefreshTokenByRefreshToken(refreshToken);
     }
 }
 
