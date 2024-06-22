@@ -20,6 +20,7 @@ Date        Author   Status    Description
 2024.06.14  이유민   Modified  ES6 모듈로 변경
 2024.06.14  이유민   Modified  대시보드 병합
 2024.06.15  박수정   Modified  전체적인 코드 통일 및 유효성 검사 코드 분리
+2024.06.18  박수정   Modified  Promise.all로 코드 변경
 */
 import { Router } from 'express';
 import DashboardService from '../services/dashboard.js';
@@ -34,7 +35,7 @@ const router = Router();
  *     get:
  *       summary: '대시보드 차트 API 데이터 조회'
  *       tags:
- *         - dashboard
+ *         - Dashboard
  *       description: 'Linebar, Tinybar, Scatter 차트 데이터 조회'
  *       responses:
  *         200:
@@ -98,7 +99,7 @@ const router = Router();
  *             properties:
  *               error:
  *                  type: string
- *                  example: '데이터가 존재하지 않습니다.'
+ *                  example: '잘못된 요청입니다.'
  *         404:
  *           description: 요청한 리소스를 찾을 수 없음
  *           schema:
@@ -118,9 +119,12 @@ const router = Router();
  */
 router.get('/', async (req, res, next) => {
     try {
-        const linebar = await DashboardService.getLinebar(); // Linebar
-        const tinybar = await DashboardService.getTinybar(); // Tinybar
-        const scatter = await DashboardService.getScatter(); // Scatter
+        // 3개의 차트 동시에 조회
+        const [linebar, tinybar, scatter] = await Promise.all([
+            DashboardService.getLinebar(),
+            DashboardService.getTinybar(),
+            DashboardService.getScatter(),
+        ]);
 
         // Service로부터 넘어온 데이터에 대한 유효성 검사
         validateServiceData([linebar, tinybar, scatter]);

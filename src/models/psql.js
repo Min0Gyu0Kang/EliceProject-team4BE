@@ -16,6 +16,9 @@ import dotenv from 'dotenv';
 const { Client } = pkg;
 dotenv.config();
 
+const MAX_RETRIES = 3;
+let retryCount = 0;
+
 const client = new Client({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
@@ -28,13 +31,21 @@ const client = new Client({
     },
 });
 
-client.connect(err => {
-    if (err) {
-        console.error('PostgreSQL 연결 에러:', err);
-    } else {
+client
+    .connect()
+    .then(() => {
         console.log('PostgreSQL 연결 성공');
-    }
-});
+    })
+    .catch(err => {
+        console.error('PostgreSQL 연결 에러:', err);
+        retryCount++;
+        if (retryCount <= MAX_RETRIES) {
+            console.log(`다시 연결 중`);
+            setTimeout(connectToDatabase, 3000); // 3초 후에 재시도
+        } else {
+            console.error(`Maximum retry attempts (${MAX_RETRIES}) reached. Could not connect to database.`);
+        }
+    });
 
 client.on('end', () => {
     console.log('PostgreSQL와의 연결이 끊겼습니다.');
