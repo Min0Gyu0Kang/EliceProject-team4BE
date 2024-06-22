@@ -11,6 +11,7 @@ Date        Author   Status    Description
 2024.06.14  이유민   Modified  Linebar, Tinybar 추가
 2024.06.14  이유민   Modified  ES6 모듈로 변경
 2024.06.15  박수정   Modified  전체적인 코드 통일 및 유효성 검사 코드 분리
+2024.06.15  이유민   Modified  코드 통일
 */
 
 import DashboardModel from '../models/dashboard.js';
@@ -32,7 +33,7 @@ class DashboardService {
             };
 
             // 녹지환경 만족도 있는 연도에만 만족도 추가
-            if (data.year % 2 == 0) {
+            if (data.year % 2 === 0) {
                 item.satisfaction = Math.round(data.satisfaction * 100) / 100;
             }
 
@@ -58,7 +59,7 @@ class DashboardService {
         function percentageCalc(data, filterValue, standard) {
             let res =
                 data.filter(dt =>
-                    standard == 2034 ? dt.will_be_old_in_10_years == filterValue : dt.is_old == filterValue,
+                    standard === 2034 ? dt.will_be_old_in_10_years === filterValue : dt.is_old === filterValue,
                 ).length / data.length;
             return parseFloat((res * 100).toFixed(2));
         }
